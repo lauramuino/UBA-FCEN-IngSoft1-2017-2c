@@ -207,6 +207,16 @@ Object subclass: #Numero
 
 	self subclassResponsibility ! !
 
+!Numero methodsFor: 'arithmetic operations' stamp: 'lm 9/8/2017 11:23:35'!
+divideAUnEntero: aDividend
+
+	self subclassResponsibility .! !
+
+!Numero methodsFor: 'arithmetic operations' stamp: 'lm 9/8/2017 11:24:21'!
+divideAUnaFraccion: aDividend
+
+	self subclassResponsibility .! !
+
 !Numero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 22:48'!
 invalidNumberType
 
@@ -303,10 +313,10 @@ initalizeWith: aValue
 	^ anAdder sumaConEntero: self.
 ! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:48:07'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'lm 9/8/2017 11:11:11'!
 / aDivisor 
 
-	^ aDivisor divisionConEntero: self.
+	^ aDivisor divideAUnEntero: self.
 	! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:55'!
@@ -314,28 +324,16 @@ initalizeWith: aValue
 	
 	^self class with: value // aDivisor integerValue! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:56:40'!
-divideAUnEntero: aDivisor 
+!Entero methodsFor: 'arithmetic operations' stamp: 'lm 9/8/2017 11:27:15'!
+divideAUnEntero: aDividend
 
-	^Fraccion with: aDivisor over: self.
+	^Fraccion with: aDividend over: self.
 	! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:57:53'!
-divideAUnaFraccion: aDivisor 
+!Entero methodsFor: 'arithmetic operations' stamp: 'lm 9/8/2017 11:27:22'!
+divideAUnaFraccion: aDividend
 
-	^ ( self * aDivisor denominator ) / aDivisor numerator.
-	! !
-
-!Entero methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:45:37'!
-divisionConEntero: aDivisor 
-
-	^Fraccion with: self over: aDivisor.
-	! !
-
-!Entero methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:45:53'!
-divisionConFraccion: aDivisor 
-
-	^ ( self * aDivisor denominator ) / aDivisor numerator.
+	^ aDividend numerator / ( self * aDividend denominator ).
 	! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:00'!
@@ -439,22 +437,22 @@ hash
 	^ anAdder sumaConFraccion: self.
 	! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:47:42'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'lm 9/8/2017 11:11:27'!
 / aDivisor 
 
-	^ aDivisor divisionConFraccion: self.
+	^ aDivisor divideAUnaFraccion: self.
 	! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:46:53'!
-divisionConEntero: aDivisor 
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'lm 9/8/2017 11:26:24'!
+divideAUnEntero: aDividend
 
-	^ ( self numerator ) / ( self denominator * aDivisor ).
+	^ (aDividend * self denominator) /  self numerator .
 	! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:47:14'!
-divisionConFraccion: aDivisor 
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'lm 9/8/2017 11:26:45'!
+divideAUnaFraccion: aDividend
 
-	^(numerator * aDivisor denominator) / (denominator * aDivisor numerator).
+	^ (denominator * aDividend numerator) / (numerator * aDividend denominator) .
 	! !
 
 !Fraccion methodsFor: 'arithmetic operations' stamp: 'lm 9/7/2017 21:44:00'!
