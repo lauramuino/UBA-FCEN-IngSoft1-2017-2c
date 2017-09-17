@@ -139,7 +139,7 @@ test10CanNotTopWhenThereAreNoObjectsInTheStack
 
 !classDefinition: #Node category: #'Stack-Exercise'!
 Object subclass: #Node
-	instanceVariableNames: 'next previous'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
@@ -216,17 +216,15 @@ isNil
 	! !
 
 
-!NilNode methodsFor: 'initialization' stamp: 'ad 9/17/2017 13:31:32'!
+!NilNode methodsFor: 'initialization' stamp: 'ad 9/17/2017 20:28:56'!
 initialize
 
-	super initialize.
-	next := self.
-	previous := self.! !
+	super initialize.! !
 
 
 !classDefinition: #NonNullNode category: #'Stack-Exercise'!
 Node subclass: #NonNullNode
-	instanceVariableNames: 'value'
+	instanceVariableNames: 'value next previous'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
