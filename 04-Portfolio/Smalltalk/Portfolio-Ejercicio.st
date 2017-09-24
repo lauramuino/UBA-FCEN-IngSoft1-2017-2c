@@ -403,44 +403,44 @@ balance
 
 !classDefinition: #Portfolio category: #'Portfolio-Ejercicio'!
 SummarizingAccount subclass: #Portfolio
-	instanceVariableNames: 'data'
+	instanceVariableNames: 'accounts'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Portfolio-Ejercicio'!
 
-!Portfolio methodsFor: 'balance' stamp: 'ad 9/21/2017 20:46:07'!
+!Portfolio methodsFor: 'balance' stamp: 'ad 9/24/2017 14:33:16'!
 balance
 
-	^ data inject: 0 into: [ :balance :account | balance + ( account balance ) value ].! !
+	^ accounts inject: 0 into: [ :balance :account | balance + account balance ].! !
 
-!Portfolio methodsFor: 'balance' stamp: 'ad 9/23/2017 10:51:11'!
+!Portfolio methodsFor: 'balance' stamp: 'ad 9/24/2017 14:33:30'!
 initialize
 
 	super initialize.
-	data := OrderedCollection new.! !
+	accounts := OrderedCollection new.! !
 
-!Portfolio methodsFor: 'balance' stamp: 'ad 9/23/2017 10:51:27'!
-with: listOfAccounts
+!Portfolio methodsFor: 'balance' stamp: 'ad 9/24/2017 14:35:33'!
+with: aCollectionOfAccounts
 		
-	data addAllFirst: listOfAccounts.! !
+	accounts addAllFirst: aCollectionOfAccounts.! !
 
 
-!Portfolio methodsFor: 'testing' stamp: 'ad 9/23/2017 10:32:49'!
+!Portfolio methodsFor: 'testing' stamp: 'ad 9/24/2017 14:33:34'!
 manages: anAccount
 	
-	^ data inject: ( self = anAccount ) into: [ :doesManages :anotherAccount | doesManages | ( anotherAccount manages: anAccount ) ].! !
+	^ accounts inject: ( self = anAccount ) into: [ :doesManages :anotherAccount | doesManages | ( anotherAccount manages: anAccount ) ].! !
 
-!Portfolio methodsFor: 'testing' stamp: 'ad 9/23/2017 10:33:02'!
+!Portfolio methodsFor: 'testing' stamp: 'ad 9/24/2017 14:33:39'!
 registers: aTransaction
 	
-	^ data inject: false into: [ :doesResgister :anAccount | doesResgister | ( anAccount registers: aTransaction ) ].
+	^ accounts inject: false into: [ :doesResgister :anAccount | doesResgister | ( anAccount registers: aTransaction ) ].
 	! !
 
 
-!Portfolio methodsFor: 'transactions' stamp: 'ad 9/23/2017 11:13:57'!
+!Portfolio methodsFor: 'transactions' stamp: 'ad 9/24/2017 14:33:43'!
 transactions 
 	
-	^ data inject: (OrderedCollection new) into: [ :transactions :anAccount | ( transactions addAllFirst: ( anAccount transactions ) ).  transactions value. ].
+	^ accounts inject: (OrderedCollection new) into: [ :transactions :anAccount | ( transactions addAllFirst: ( anAccount transactions ) ).  transactions value. ].
 		
 ! !
 
@@ -467,28 +467,27 @@ accountNotManagedMessageDescription
 
 	^ 'Account not managed'.! !
 
-!Portfolio class methodsFor: 'instance creation' stamp: 'ad 9/23/2017 11:00:41'!
+!Portfolio class methodsFor: 'instance creation' stamp: 'ad 9/24/2017 14:47:21'!
 with: anAccount1 with: anAccount2
 
-	| listOfAccounts |
-	
-	listOfAccounts := OrderedCollection new.
 	
 	(anAccount1 manages: anAccount2) 
 		ifTrue: [ 
 			self error: self accountAlreadyManagedErrorMessage 
 		]  
 		ifFalse: [	
-			listOfAccounts add: anAccount1.
-			listOfAccounts add: anAccount2.
+			| aCollectionOfAccounts |
+			aCollectionOfAccounts := OrderedCollection new.
+			aCollectionOfAccounts add: anAccount1.
+			aCollectionOfAccounts add: anAccount2.
+			^ self new with: aCollectionOfAccounts.
 		].
+! !
 
-	^ self new with: listOfAccounts.! !
-
-!Portfolio class methodsFor: 'instance creation' stamp: 'HernanWilkinson 7/13/2011 18:41'!
+!Portfolio class methodsFor: 'instance creation' stamp: 'ad 9/24/2017 14:47:39'!
 withAll: aCollectionOfAccounts
 
-	self shouldBeImplemented ! !
+	self subclassResponsibility.! !
 
 
 !classDefinition: #ReceptiveAccount category: #'Portfolio-Ejercicio'!
