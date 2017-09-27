@@ -838,23 +838,6 @@ compute
 
 	self subclassResponsibility.! !
 
-!Calculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 19:46:02'!
-computelinesOf: aPortfolio withNamingAccounts: aDictionary withDepth: aDepth
-
-	| lines |
-	
-	lines := OrderedCollection new.
-		
-	lines add: ( ( Account2NameAdapter adapting: aPortfolio ) asStringWithDepth: aDepth fromDictionary: aDictionary ).
-	
-	(aPortfolio isKindOf: Portfolio ) ifTrue:[
-	( aPortfolio accounts ) do: [ :anAccount |
-		lines addAllLast: ( self computelinesOf: anAccount withNamingAccounts: aDictionary withDepth: ( aDepth + 1 ) ). "anAccount linesWithNamingAccounts: aDictionary withDepth: ( aDepth + 1 ) )."
-		 ].
-	].
-	
-	^ lines.! !
-
 
 !classDefinition: #InvestmentEarningsCalculator category: #'PortfolioTreePrinter-Ejercicio'!
 Calculator subclass: #InvestmentEarningsCalculator
