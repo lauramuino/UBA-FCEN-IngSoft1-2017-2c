@@ -846,14 +846,14 @@ Calculator subclass: #InvestmentEarningsCalculator
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!InvestmentEarningsCalculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 19:49:55'!
+!InvestmentEarningsCalculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 20:27:33'!
 compute
 
 	|total|
 	
 	total := 0.
 
-	( transactions select: [ :aTransaction | aTransaction isKindOf: CertificateOfDeposit ] ) do: [ :aCertificateDeposit | total := total + aCertificateDeposit earning].
+	transactions do: [ :aCertificateDeposit | total := total + aCertificateDeposit earning].
 	
 	^ total.! !
 
@@ -868,10 +868,10 @@ initializeWith: listOfTransactions
 InvestmentEarningsCalculator class
 	instanceVariableNames: ''!
 
-!InvestmentEarningsCalculator class methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 19:53:46'!
+!InvestmentEarningsCalculator class methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 20:27:25'!
 with: anAccount
 
-	^ self new initializeWith: ( anAccount transactions ).! !
+	^ self new initializeWith: ( anAccount transactions select: [ :aTransaction | aTransaction isKindOf: CertificateOfDeposit ] ).! !
 
 
 !classDefinition: #InvestmentNetCalculator category: #'PortfolioTreePrinter-Ejercicio'!
@@ -881,14 +881,14 @@ Calculator subclass: #InvestmentNetCalculator
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!InvestmentNetCalculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 19:50:46'!
+!InvestmentNetCalculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 20:26:51'!
 compute
 
 	|total|
 	
 	total := 0.
 
-	( transactions select: [ :aTransaction | aTransaction isKindOf: CertificateOfDeposit ] ) do: [ :aCertificateDeposit | total := total + aCertificateDeposit value].
+	transactions do: [ :aCertificateDeposit | total := total + aCertificateDeposit value].
 	
 	^ total.! !
 
@@ -903,10 +903,10 @@ initializeWith: listOfTransactions
 InvestmentNetCalculator class
 	instanceVariableNames: ''!
 
-!InvestmentNetCalculator class methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 19:54:09'!
+!InvestmentNetCalculator class methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 20:26:35'!
 with: anAccount
 
-	^ self new initializeWith: ( anAccount transactions ).! !
+	^ self new initializeWith: ( ( anAccount transactions select: [ :aTransaction | aTransaction isKindOf: CertificateOfDeposit ] ) ).! !
 
 
 !classDefinition: #NamingAccountsCalculator category: #'PortfolioTreePrinter-Ejercicio'!
@@ -991,28 +991,28 @@ with: anAccount
 
 !classDefinition: #TransferNetCalculator category: #'PortfolioTreePrinter-Ejercicio'!
 Calculator subclass: #TransferNetCalculator
-	instanceVariableNames: 'transactions'
+	instanceVariableNames: 'depositTransfers withdrawTransfers'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!TransferNetCalculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 19:51:37'!
+!TransferNetCalculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 20:30:37'!
 compute
 
 	|total|
 	
 	total := 0.
 
-	( transactions select: [ :aTransaction | aTransaction isKindOf: TransferDeposit ] ) do: [ :aTransferDeposit | total := total + aTransferDeposit value].
-	
-	( transactions select: [ :aTransaction | aTransaction isKindOf: TransferWithdraw ] ) do: [ :aTransferWithdraw | total := total - aTransferWithdraw value].
+	depositTransfers do: [ :aTransferDeposit | total := total + aTransferDeposit value].
+	withdrawTransfers do: [ :aTransferDeposit | total := total - aTransferDeposit value].
 	
 	^ total.! !
 
-!TransferNetCalculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 19:54:42'!
-initializeWith: listOfTransactions
+!TransferNetCalculator methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 20:29:47'!
+initializeWithDeposits: listOfDeposits withWithDraws: listOfWithDraws
 
-	transactions := listOfTransactions.	! !
+	depositTransfers := listOfDeposits.
+	withdrawTransfers := listOfWithDraws.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1020,10 +1020,10 @@ initializeWith: listOfTransactions
 TransferNetCalculator class
 	instanceVariableNames: ''!
 
-!TransferNetCalculator class methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 19:54:12'!
+!TransferNetCalculator class methodsFor: 'as yet unclassified' stamp: 'ad 9/27/2017 20:30:13'!
 with: anAccount
 
-	^ self new initializeWith: ( anAccount transactions ).! !
+	^ self new initializeWithDeposits: ( anAccount transactions select: [ :aTransaction | aTransaction isKindOf: TransferDeposit ] )  withWithDraws: ( anAccount transactions select: [ :aTransaction | aTransaction isKindOf: TransferWithdraw ] ).! !
 
 
 !classDefinition: #SummarizingAccount category: #'PortfolioTreePrinter-Ejercicio'!
