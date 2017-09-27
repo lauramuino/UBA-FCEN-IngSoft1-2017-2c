@@ -478,15 +478,15 @@ investmentNetOf: aReceptiveAccount
 	
 	^ aReceptiveAccount investmentNet.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'ad 9/27/2017 17:59:47'!
+!PortfolioTest methodsFor: 'test support' stamp: 'ad 9/27/2017 18:38:47'!
 portofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
 	
-	^ aPortfolio linesWithNamingAccounts: aDictionary.! !
+	^ aPortfolio linesWithNamingAccounts: aDictionary withDepth: 0.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'HernanWilkinson 9/6/2016 19:43'!
+!PortfolioTest methodsFor: 'test support' stamp: 'ad 9/27/2017 18:41:12'!
 reversePortofolioTreeOf: aPortfolio namingAccountWith: aDictionary 
 	
-	self shouldBeImplemented ! !
+	^ ( aPortfolio linesWithNamingAccounts: aDictionary withDepth: 0 ) reversed.! !
 
 
 !classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
@@ -919,10 +919,24 @@ balance
 	^ accounts sum: [ :account | account balance ]
 ! !
 
-!Portfolio methodsFor: 'transactions' stamp: 'ad 9/27/2017 17:59:35'!
-linesWithNamingAccounts: aDictionary
+!Portfolio methodsFor: 'transactions' stamp: 'ad 9/27/2017 18:40:08'!
+linesWithNamingAccounts: aDictionary withDepth: aDepth
 
-	 ^ accounts inject: OrderedCollection new into: [ :accountsNameLines :anAccount | accountsNameLines add: ( aDictionary at: anAccount ) . accountsNameLines. ].! !
+	| lines currentName |
+	
+	lines := OrderedCollection new.
+	
+	currentName := ''.
+	
+	aDepth timesRepeat: [ currentName := currentName, ' ' ].
+		
+	lines add: ( currentName, ( aDictionary at: self ) ).
+	
+	accounts do: [ :anAccount |
+		lines addAllLast: ( anAccount linesWithNamingAccounts: aDictionary withDepth: ( aDepth + 1 ) ).
+		 ].
+	
+	^ lines.! !
 
 !Portfolio methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 19:23'!
 transactions 
@@ -1050,6 +1064,21 @@ investmentEarnings
 investmentNet
 
 	^ ( transactions inject: 0 into: [ :totalInvestment :aTransaction | aTransaction affectInvestmentNet: totalInvestment ] ).! !
+
+!ReceptiveAccount methodsFor: 'testing' stamp: 'ad 9/27/2017 18:40:15'!
+linesWithNamingAccounts: aDictionary withDepth: aDepth
+
+	| lines currentName |
+	
+	lines := OrderedCollection new. 
+	
+	currentName := ''.
+	
+	aDepth timesRepeat: [ currentName := currentName, ' ' ].
+	
+	lines add: ( currentName, ( aDictionary at: self ) ).
+	
+	^ lines.! !
 
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 manages: anAccount
