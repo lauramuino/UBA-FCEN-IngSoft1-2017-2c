@@ -435,103 +435,55 @@ test05ElevatorGetsIdleWhenDoorGetOpened
 
 !classDefinition: #ElevatorController category: #'Elevator-Ejercicio'!
 Object subclass: #ElevatorController
-	instanceVariableNames: 'state cabinState cabinDoorState cabinFloorNumber floorsToGo'
+	instanceVariableNames: 'globalState floorsToGo cabinFloorNumber'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Elevator-Ejercicio'!
 
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/3/2017 18:36:45'!
+!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:55:34'!
 cabinDoorClosed
-	self isIdle ifTrue: [ElevatorEmergency signal: 'Sensor de puerta desincronizado'].
-	self isCabinDoorClosed ifTrue:[ElevatorEmergency signal:'Sensor de puerta desincronizado']. 
-	self isCabinDoorOpening ifTrue:[ElevatorEmergency signal:'Sensor de puerta desincronizado'].
-	cabinDoorState := 'Closed'.
-	cabinState := 'Moving'.! !
 
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 15:41:16'!
+	globalState := globalState cabinDoorClosed.! !
+
+!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:16:27'!
 cabinDoorOpened
-	(floorsToGo isEmpty) ifTrue: [	state := 'Idle'].
-	cabinState := 'Stopped'.
-	cabinDoorState := 'Opened'.! !
+	globalState := globalState cabinDoorOpened: floorsToGo.! !
 
 !ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 13:45:35'!
 cabinFloorNumber
 	^cabinFloorNumber .! !
 
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/3/2017 18:30:31'!
+!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:22:07'!
 cabinOnFloor: aFloorNumber
-	(self isCabinMoving) ifFalse: [^ElevatorEmergency signal: 'Sensor de cabina desincronizado'].
-	(aFloorNumber = (1+ cabinFloorNumber) ) ifFalse:[^ElevatorEmergency signal: 'Sensor de cabina desincronizado'].
+
+	(aFloorNumber = (cabinFloorNumber +1) ) ifFalse:[^ElevatorEmergency signal:  'Sensor de cabina desincronizado'.].
 	cabinFloorNumber := aFloorNumber .
+	^globalState := globalState cabinOnFloor.
+	
+	"(self isCabinMoving) ifFalse: [^ElevatorEmergency signal: 'Sensor de cabina desincronizado'].
 	state := 'Working'.
 	cabinState := 'Stopped'.
-	cabinDoorState := 'Opening'.! !
+	cabinDoorState := 'Opening'."! !
 
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 16:00:24'!
+!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:30:42'!
 closeCabinDoor
-	(self isIdle) ifFalse: [
-		(self isCabinMoving) ifFalse: [
-			(self isCabinDoorOpening) ifFalse: [ 
-				cabinDoorState := 'Closing'
-				].
-			].
-		].! !
+	^globalState := globalState closeCabinDoor.! !
 
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 15:49:38'!
+!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:56:58'!
 goUpPushedFromFloor: aFloorNumber
-	(self isWorking) ifTrue:[
+	globalState := globalState goUpPushedFromFloor.
+	(self isIdle) ifFalse:[
 		floorsToGo add: aFloorNumber .
 	]
-	ifFalse:[ state := 'Working'.
-			 cabinDoorState := 'Closing'.]! !
+! !
 
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 15:38:48'!
+!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:40:20'!
 initialize
-	state := 'Idle'.
-	cabinState := 'Stopped'.
-	cabinDoorState := 'Opened'.
-	cabinFloorNumber := 0.
-	floorsToGo := OrderedCollection new.! !
+	globalState := IdleState new.! !
 
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 14:18:47'!
-isCabinDoorClosed
-	^cabinDoorState = 'Closed'.! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 14:18:14'!
-isCabinDoorClosing
-	^cabinDoorState = 'Closing'.! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 13:46:54'!
-isCabinDoorOpened
-	^cabinDoorState = 'Opened'.! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 14:21:43'!
-isCabinDoorOpening
-	^cabinDoorState = 'Opening'.! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 14:16:09'!
-isCabinMoving
-	^cabinState = 'Moving'.! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 13:43:50'!
-isCabinStopped
-	^cabinState = 'Stopped'.! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 15:41:55'!
-isCabinWaitingForPeople
-	^true.! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 14:41:46'!
-isIdle
-	^ (state = 'Idle').! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 14:45:47'!
-isWorking
-	^state = 'Working'.! !
-
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 15:50:45'!
+!ElevatorController methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:52:58'!
 openCabinDoor
-	(self isCabinDoorOpened) ifFalse: [
+	(self isCabinDoorOpened) ifFalse: ["cubrir caso lista a visitar no vacia"
 		(self isCabinMoving) ifFalse: [
 			cabinDoorState := 'Opening'
 		]
@@ -541,13 +493,233 @@ openCabinDoor
 waitForPeopleTimedOut
 	cabinDoorState := 'Closing'.! !
 
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'ElevatorController class' category: #'Elevator-Ejercicio'!
-ElevatorController class
-	instanceVariableNames: ''!
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:49:52'!
+isCabinDoorClosed
+	^ globalState isCabinDoorClosed.! !
 
-!ElevatorController class methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 13:38:26'!
-new
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:50:28'!
+isCabinDoorClosing
+	^globalState isCabinDoorClosing .! !
 
-	^super new.! !
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:50:57'!
+isCabinDoorOpened
+	^globalState isCabinDoorOpened .! !
+
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:51:06'!
+isCabinDoorOpening
+	^globalState isCabinDoorOpening .! !
+
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:51:37'!
+isCabinMoving
+	^globalState isCabinMoving .! !
+
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:51:48'!
+isCabinStopped
+	^globalState isCabinStopped .! !
+
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:52:00'!
+isCabinWaitingForPeople
+	^globalState isCabinWaitingForPeople .! !
+
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:52:21'!
+isIdle
+	^globalState isIdle.! !
+
+!ElevatorController methodsFor: 'testing' stamp: 'lm 10/2/2017 20:52:36'!
+isWorking
+	^globalState isWorking.! !
+
+
+!classDefinition: #GlobalState category: #'Elevator-Ejercicio'!
+Object subclass: #GlobalState
+	instanceVariableNames: 'state cabinState cabinDoorState'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Elevator-Ejercicio'!
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:50:15'!
+isCabinDoorClosed
+	^ false.! !
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:50:34'!
+isCabinDoorClosing
+	^false.! !
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:50:46'!
+isCabinDoorOpened
+	^ false.! !
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:50:48'!
+isCabinDoorOpening
+	^ false.! !
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:51:18'!
+isCabinMoving
+	^false.! !
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:51:25'!
+isCabinStopped
+	^true.! !
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:52:03'!
+isCabinWaitingForPeople
+	^false.! !
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:52:26'!
+isIdle
+	^false.! !
+
+!GlobalState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:52:39'!
+isWorking
+	^true.! !
+
+
+!classDefinition: #ClosingCabinDoorState category: #'Elevator-Ejercicio'!
+GlobalState subclass: #ClosingCabinDoorState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Elevator-Ejercicio'!
+
+!ClosingCabinDoorState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:56:11'!
+cabinDoorClosed
+
+	^TravellingState new.! !
+
+!ClosingCabinDoorState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:16:57'!
+isCabinDoorClosing
+	^true.! !
+
+
+!classDefinition: #IdleState category: #'Elevator-Ejercicio'!
+GlobalState subclass: #IdleState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Elevator-Ejercicio'!
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:45:06'!
+cabinDoorClosed
+	^ElevatorEmergency signal: 'Sensor de puerta desincronizado'.! !
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:31:49'!
+closeCabinDoor
+	^self.! !
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:40:27'!
+goUpPushedFromFloor
+	^ClosingCabinDoorState new.! !
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:53:45'!
+goUpPushedFromFloor: aFloorNumber
+	state := 'Working'.
+	cabinDoorState := 'Closing'.! !
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:08:39'!
+isCabinDoorOpened
+	^true.! !
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:08:17'!
+isCabinStopped
+	^true.! !
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:54:14'!
+isIdle 
+	^true.! !
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:54:24'!
+isWorking
+	^false.! !
+
+!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:52:19'!
+openCabinDoor! !
+
+
+!classDefinition: #OpenedCabinDoorWaitingForPeopleState category: #'Elevator-Ejercicio'!
+GlobalState subclass: #OpenedCabinDoorWaitingForPeopleState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Elevator-Ejercicio'!
+
+!OpenedCabinDoorWaitingForPeopleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:34:13'!
+closeCabinDoor
+	^ClosingCabinDoorState new.! !
+
+!OpenedCabinDoorWaitingForPeopleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:18:08'!
+isCabinDoorOpened
+	^true.! !
+
+!OpenedCabinDoorWaitingForPeopleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:19:56'!
+isCabinWaitingForPeople
+	^true.! !
+
+
+!classDefinition: #OpeningCabinDoorState category: #'Elevator-Ejercicio'!
+GlobalState subclass: #OpeningCabinDoorState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Elevator-Ejercicio'!
+
+!OpeningCabinDoorState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:55:27'!
+cabinDoorClosed
+	^ElevatorEmergency signal: 'Sensor de puerta desincronizado'.! !
+
+!OpeningCabinDoorState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:14:55'!
+cabinDoorOpened: floorsToGo
+
+	(floorsToGo isEmpty) ifTrue: [	^IdleState new].
+	^OpenedCabinDoorWaitingForPeopleState new.! !
+
+!OpeningCabinDoorState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:37:27'!
+closeCabinDoor
+	^self.! !
+
+!OpeningCabinDoorState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:52:51'!
+goUpPushedFromFloor
+	^self! !
+
+!OpeningCabinDoorState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:18:32'!
+isCabinDoorOpening
+	^true.! !
+
+
+!classDefinition: #TravellingState category: #'Elevator-Ejercicio'!
+GlobalState subclass: #TravellingState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Elevator-Ejercicio'!
+
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:55:41'!
+cabinDoorClosed
+	^ElevatorEmergency signal: 'Sensor de puerta desincronizado'.! !
+
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:25:51'!
+cabinOnFloor
+	^OpeningCabinDoorState new.! !
+
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:38:02'!
+closeCabinDoor
+	^self.! !
+
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:07:33'!
+isCabinDoorClosed
+	^true.! !
+
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:04:56'!
+isCabinMoving
+	^true.! !
+
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:19:39'!
+isCabinStopped
+	^false.! !
+
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 20:07:21'!
+isWorking
+	^true.! !
+
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:59:44'!
+openCabinDoor! !
