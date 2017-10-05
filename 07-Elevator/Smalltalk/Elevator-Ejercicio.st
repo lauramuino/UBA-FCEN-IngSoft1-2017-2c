@@ -464,13 +464,10 @@ cabinOnFloor: aFloorNumber
 closeCabinDoor
 	^globalState := globalState closeCabinDoor.! !
 
-!ElevatorController methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:11:15'!
+!ElevatorController methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:29:44'!
 goUpPushedFromFloor: aFloorNumber
 
-	(self isWorking) ifTrue:[
-		floorsToGo add: aFloorNumber .
-	].
-	globalState := globalState goUpPushedFromFloor.
+	globalState := globalState goUpPushedFromFloor: aFloorNumber withFloors: floorsToGo.
 ! !
 
 !ElevatorController methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:02:59'!
@@ -659,14 +656,10 @@ cabinDoorClosed
 closeCabinDoor
 	^self.! !
 
-!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:40:27'!
-goUpPushedFromFloor
-	^ClosingCabinDoorState new.! !
+!IdleState methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:29:28'!
+goUpPushedFromFloor: aFloorNumber withFloors: floorsToGo.
 
-!IdleState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 19:53:45'!
-goUpPushedFromFloor: aFloorNumber
-	state := 'Working'.
-	cabinDoorState := 'Closing'.! !
+	^ClosingCabinDoorState new.! !
 
 !IdleState methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:07:50'!
 openCabinDoor
@@ -799,9 +792,11 @@ cabinDoorOpened: floorsToGo
 closeCabinDoor
 	^self.! !
 
-!OpeningCabinDoorState methodsFor: 'as yet unclassified' stamp: 'lm 10/2/2017 21:52:51'!
-goUpPushedFromFloor
-	^self! !
+!OpeningCabinDoorState methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:28:11'!
+goUpPushedFromFloor: aFloorNumber withFloors: floorsToGo.
+
+	floorsToGo add: aFloorNumber.
+	^self.! !
 
 !OpeningCabinDoorState methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:07:42'!
 openCabinDoor
@@ -874,9 +869,10 @@ cabinOnFloor
 closeCabinDoor
 	^self.! !
 
-!TravellingState methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:09:14'!
-goUpPushedFromFloor
+!TravellingState methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:28:06'!
+goUpPushedFromFloor: aFloorNumber withFloors: floorsToGo.
 
+	floorsToGo add: aFloorNumber.
 	^self.! !
 
 !TravellingState methodsFor: 'as yet unclassified' stamp: 'ad 10/5/2017 20:07:35'!
