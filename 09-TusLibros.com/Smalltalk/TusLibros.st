@@ -5,82 +5,78 @@ TestCase subclass: #TusLibrosTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 20:15:56'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 18:58:47'!
 test01unCarritoNuevoEstaVacio
+
 	|unCarrito|
 	unCarrito:= Carrito withCatalog: OrderedCollection new.
 	
 	self assert: unCarrito isEmpty.! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 21:05:14'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 18:59:28'!
 test02siSeAgregaUnLibroDeLaEditorialAUnCarritoDejaDeSerVacio
-	|aCatalog unCarrito anIsbnNumber|
-	
-	anIsbnNumber:=1234.
-	aCatalog := OrderedCollection new.
-	aCatalog add: anIsbnNumber .
-	
-	unCarrito:= Carrito withCatalog: aCatalog.
-	unCarrito addBook: anIsbnNumber withQuantity: 1.
-	
-	self deny: unCarrito isEmpty.
-	! !
-
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 21:32:47'!
-test03intentarAgregarUnLibroDeOtraEditorialAUnCarritoVacioLanzaUnError
-	|aCatalog unCarrito anIsbnNumber|
-	
-	aCatalog:= OrderedCollection new.
-	anIsbnNumber:=1235.
-	
-	unCarrito:= Carrito withCatalog: aCatalog.
-	self 
-		should: [unCarrito addBook: anIsbnNumber withQuantity: 1]
-		raise: Error 
-		withExceptionDo: [ :anError |
-			self assert: anError messageText = Carrito ErrorLibroDebePertenecerAEditorial. 
-			"CAMBIAR"].
-	! !
-
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 21:05:26'!
-test04siSeAgregaUnLibroAlCarritoDebePertenecerAlCarrito
-	|aCatalog unCarrito anIsbnNumber|
-	
-	aCatalog:= OrderedCollection new.
-	anIsbnNumber:=1235.
+	| aCatalog unCarrito anIsbnNumber |
+	anIsbnNumber _ 1234.
+	aCatalog _ OrderedCollection new.
 	aCatalog add: anIsbnNumber.
-	
-	unCarrito:= Carrito withCatalog: aCatalog.
-	unCarrito addBook: anIsbnNumber withQuantity: 1.
-	
-	self assert: (unCarrito containsBook: anIsbnNumber).
-	! !
+	unCarrito _ Carrito withCatalog: aCatalog.
+	unCarrito
+		add: anIsbnNumber
+		withQuantity: 1.
+	self deny: unCarrito isEmpty.! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 21:22:29'!
-test05siSeAgreganCantidadesNoEnterasDeLibrosAlCarritoSeLanzaUnError
-	|aCatalog unCarrito anIsbnNumber|
-	
-	anIsbnNumber:=1234.
-	aCatalog := OrderedCollection new.
-	aCatalog add: anIsbnNumber .
-	
-	unCarrito:= Carrito withCatalog: aCatalog.
-	self should: [unCarrito addBook: anIsbnNumber withQuantity: 1.5]
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:02:00'!
+test03noSePuedenAgregarLIbrosDeOtraEditorialAUnCarrito
+	| aCatalog unCarrito anIsbnNumber |
+	aCatalog _ OrderedCollection new.
+	anIsbnNumber _ 1235.
+	unCarrito _ Carrito withCatalog: aCatalog.
+	self
+		should: [
+			unCarrito
+				add: anIsbnNumber
+				withQuantity: 1 ]
 		raise: Error
-		 withExceptionDo: [ :anError |
-			self assert: anError messageText = Carrito ErrorCantidadDeLibrosDebeSerEntera ].
-	! !
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Carrito ErrorItemDebePertenecerAlCatalogo.
+			self assert: unCarrito isEmpty ].! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 21:23:08'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:00:11'!
+test04siSeAgregaUnLibroAlCarritoDebePertenecerAlCarrito
+	| aCatalog unCarrito anIsbnNumber |
+	aCatalog _ OrderedCollection new.
+	anIsbnNumber _ 1235.
+	aCatalog add: anIsbnNumber.
+	unCarrito _ Carrito withCatalog: aCatalog.
+	unCarrito
+		add: anIsbnNumber
+		withQuantity: 1.
+	self assert: (unCarrito contains: anIsbnNumber).! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:01:25'!
+test05noSePuedenAgregarCantidadesNoEnterasDeLibrosAUnCarrito
+	| aCatalog unCarrito anIsbnNumber |
+	anIsbnNumber _ 1234.
+	aCatalog _ OrderedCollection new.
+	aCatalog add: anIsbnNumber.
+	unCarrito _ Carrito withCatalog: aCatalog.
+	self
+		should: [
+			unCarrito
+				add: anIsbnNumber
+				withQuantity: 1.5 ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Carrito ErrorCantidadDeItemsDebeSerEntera.
+			self assert: unCarrito isEmpty ].! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:00:11'!
 test06unLibroQueNoSeAgregoAlCarritoNoPerteneceAlCarrito
-	|aCatalog unCarrito anIsbnNumber|
-	
-	aCatalog:= OrderedCollection new.
-	anIsbnNumber:=1235.
-	
-	unCarrito:= Carrito withCatalog: aCatalog.
-	
-	self deny: (unCarrito containsBook: anIsbnNumber).! !
+	| aCatalog unCarrito anIsbnNumber |
+	aCatalog _ OrderedCollection new.
+	anIsbnNumber _ 1235.
+	unCarrito _ Carrito withCatalog: aCatalog.
+	self deny: (unCarrito contains: anIsbnNumber).! !
 
 
 !classDefinition: #Carrito category: #TusLibros!
@@ -90,20 +86,20 @@ Object subclass: #Carrito
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Carrito methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 21:19:28'!
-addBook: anIsbnNumber withQuantity: aNumber
-
-	( aNumber isKindOf: Integer ) ifFalse: [ self error: Carrito ErrorCantidadDeLibrosDebeSerEntera ].
+!Carrito methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:02:11'!
+add: anItem withQuantity: aQuantity
+	(aQuantity isKindOf: Integer) ifFalse: [ self error: Carrito ErrorCantidadDeItemsDebeSerEntera ].
 	
-	[ (catalog find: anIsbnNumber).
-		products add: anIsbnNumber withOccurrences: aNumber  ] 
-	on:Error
-	do:[ self error: Carrito ErrorLibroDebePertenecerAEditorial ]! !
+	[catalog find: anItem.
+	products
+		add: anItem
+		withOccurrences: aQuantity ]
+		on: Error
+		do: [ self error: Carrito ErrorItemDebePertenecerAlCatalogo ].! !
 
-!Carrito methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 21:07:42'!
-containsBook: anIsbnNumber 
-	
-	^ products includes: anIsbnNumber.! !
+!Carrito methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:00:22'!
+contains: item
+	^ products includes: item.! !
 
 !Carrito methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 20:05:05'!
 isEmpty
@@ -121,15 +117,13 @@ withCatalog: aCatalog.
 Carrito class
 	instanceVariableNames: ''!
 
-!Carrito class methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 21:16:23'!
-ErrorCantidadDeLibrosDebeSerEntera
+!Carrito class methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:02:39'!
+ErrorCantidadDeItemsDebeSerEntera
+	^ 'La cantidad de items a agregar debe ser entera'.! !
 
-	^'La cantidad de libros debe ser entera'.! !
-
-!Carrito class methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 20:44:41'!
-ErrorLibroDebePertenecerAEditorial
-
-	^'El libro debe pertenecer a la editorial'.! !
+!Carrito class methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:02:49'!
+ErrorItemDebePertenecerAlCatalogo
+	^ 'El item a agregar debe pertenecer al catalogo'.! !
 
 !Carrito class methodsFor: 'as yet unclassified' stamp: 'lm 10/26/2017 20:21:49'!
 withCatalog: aCatalog
