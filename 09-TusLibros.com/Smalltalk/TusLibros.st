@@ -103,6 +103,26 @@ test08seDebenListarLosItemsDeUnCarritoConSuCantidad
 	listaDeItems find: { isbnNumber. 5 }.
 	listaDeItems find: {isbnNumber2. 6}.! !
 
+!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/30/2017 18:20:52'!
+test09noSePuedeHacerCheckoutDeUnCarritoVacio
+
+	| aCatalog unCarrito aCashier |
+	aCatalog _ OrderedCollection new.
+	unCarrito _ Carrito withCatalog: aCatalog.
+	aCashier := Cashier new.
+	self
+		should: [ aCashier checkout: unCarrito ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Cashier ErrorCheckOutDeCarritoVacio.
+			"INVARIANTE???" ].
+	! !
+
+!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/30/2017 18:35:39'!
+test10noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
+
+	! !
+
 
 !classDefinition: #Carrito category: #TusLibros!
 Object subclass: #Carrito
@@ -139,15 +159,15 @@ isEmpty
 	^products isEmpty.! !
 
 
-!Carrito methodsFor: 'as yet unclassified' stamp: 'ad 10/29/2017 19:59:52'!
+!Carrito methodsFor: 'as yet unclassified' stamp: 'ad 10/30/2017 18:29:24'!
 listItemsWithQuantities
 	
 	|listOfItems|
 	
-	listOfItems := OrderedCollection new.
+	listOfItems := Dictionary new.
 	
 	(products asSet) do: [ :item | 
-		listOfItems add: { item. (products occurrencesOf: item) }. ].
+		listOfItems add: ( Association key: item value: (products occurrencesOf: item) ). ].
 	
 	^listOfItems.! !
 
@@ -169,3 +189,26 @@ ErrorCantidadDeItemsDebeSerEntera
 !Carrito class methodsFor: 'error message' stamp: 'ad 10/29/2017 19:02:49'!
 ErrorItemDebePertenecerAlCatalogo
 	^ 'El item a agregar debe pertenecer al catalogo'.! !
+
+
+!classDefinition: #Cashier category: #TusLibros!
+Object subclass: #Cashier
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 10/30/2017 18:21:15'!
+checkout: unCarrito
+
+	^ self error: Cashier ErrorCheckOutDeCarritoVacio.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Cashier class' category: #TusLibros!
+Cashier class
+	instanceVariableNames: ''!
+
+!Cashier class methodsFor: 'error message' stamp: 'ad 10/30/2017 18:20:37'!
+ErrorCheckOutDeCarritoVacio
+	^ 'No se puede hacer checkout de un carrito vacio'.! !
