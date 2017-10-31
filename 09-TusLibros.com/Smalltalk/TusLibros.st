@@ -1,3 +1,116 @@
+!classDefinition: #CardTest category: #TusLibros!
+TestCase subclass: #CardTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:09:33'!
+test01NoSePuedeCrearUnaTarjetaSiSuIDNoSon16Digitos
+	
+	self should:
+		[ Card withCardID: '123456789012345' withClientName: 'Pepe'  withExpirationMonth: 2 withExpirationYear: 2019.]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorCardIDMustHave16Digits ].
+		
+	self should:
+		[ Card withCardID: '12345678901a2345' withClientName: 'Pepe'  withExpirationMonth: 2 withExpirationYear: 2019.]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorCardIDMustHave16Digits ].! !
+
+!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:10:50'!
+test02NoSePuedeCrearUnaTarjetaConUnNombreVacioDeCliente
+	self
+		should: [
+			Card
+				withCardID: '1234567890123454'
+				withClientName: ''
+				withExpirationMonth: 2
+				withExpirationYear: 2019 ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorClientNameCannotBeEmpty ].! !
+
+!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:11:20'!
+test03NoSePuedeCrearUnaTarjetaSiElNombreDelClienteNoSonLetrasConEspacios
+	self
+		should: [
+			Card
+				withCardID: '1234567890123454'
+				withClientName: ' 1 '
+				withExpirationMonth: 2
+				withExpirationYear: 2019 ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorClientNameCannotBeEmpty ].! !
+
+!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:20:19'!
+test04NoSePuedeCrearUnaTarjetaSiElMesNoEsNumerico
+	self
+		should: [
+			Card
+				withCardID: '1234567890123454'
+				withClientName: 'Juanito Nieve'
+				withExpirationMonth: 'a'
+				withExpirationYear: 2019 ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorNumeroDeMesInvalido ].! !
+
+!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:20:35'!
+test05NoSePuedeCrearUnaTarjetaSiElMesNoEsUnNumeroEntre1y12
+	self
+		should: [
+			Card
+				withCardID: '1234567890123454'
+				withClientName: 'Juanito Nieve'
+				withExpirationMonth: 0
+				withExpirationYear: 2019 ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorNumeroDeMesInvalido ].
+	self
+		should: [
+			Card
+				withCardID: '1234567890123454'
+				withClientName: 'Juanito Nieve'
+				withExpirationMonth: 13
+				withExpirationYear: 2019 ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorNumeroDeMesInvalido ].! !
+
+!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:20:49'!
+test06NoSePuedeCrearUnaTarjetaSiElAñoEsEl0
+	self
+		should: [
+			Card
+				withCardID: '1234567890123454'
+				withClientName: 'Juanito Nieve'
+				withExpirationMonth: 5
+				withExpirationYear: 0 ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorNumeroDeAñoInvalido ].
+		! !
+
+!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:20:08'!
+test06NoSePuedeCrearUnaTarjetaSiElAñoNoEsNumerico
+	self
+		should: [
+			Card
+				withCardID: '1234567890123454'
+				withClientName: 'Juanito Nieve'
+				withExpirationMonth: 5
+				withExpirationYear: 'h' ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Card ErrorNumeroDeAñoInvalido ].
+		! !
+
+
 !classDefinition: #TusLibrosTest category: #TusLibros!
 TestCase subclass: #TusLibrosTest
 	instanceVariableNames: 'testInstanceFactory'
@@ -164,8 +277,30 @@ withCardID: aCardID withClientName: aClientName withExpirationMonth: aMonth with
 Card class
 	instanceVariableNames: ''!
 
-!Card class methodsFor: 'as yet unclassified' stamp: 'lm 10/30/2017 19:04:56'!
+!Card class methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 18:48:59'!
+ErrorCardIDMustHave16Digits! !
+
+!Card class methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:03:37'!
+ErrorClientNameCannotBeEmpty! !
+
+!Card class methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:05:19'!
+ErrorClientNameMustBeLettersWithSpaces! !
+
+!Card class methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:15:06'!
+ErrorNumeroDeAñoInvalido! !
+
+!Card class methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:13:32'!
+ErrorNumeroDeMesInvalido! !
+
+!Card class methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:18:55'!
 withCardID: aCardID withClientName: aClientName withExpirationMonth: aMonth withExpirationYear: aYear
+
+	( ( aCardID size ) == 16 ) ifFalse: [ ^ self error: Card ErrorCardIDMustHave16Digits ].
+	( aCardID allSatisfy: [ :char | char isDigit ] ) ifFalse: [ ^ self error: Card ErrorCardIDMustHave16Digits ].
+	( aClientName allSatisfy: [ :char | char isSeparator ] ) ifTrue: [ ^ self error: Card ErrorClientNameCannotBeEmpty ].
+	( aClientName allSatisfy: [ :char | char isSeparator | char isLetter ]  ) ifFalse: [ ^self error: Card ErrorClientNameMustBeLettersWithSpaces ].
+	( ( aMonth isKindOf: Integer ) and: [ (aMonth <= 12) and: [ aMonth >= 1 ] ] ) ifFalse: [ ^self error: Card ErrorNumeroDeMesInvalido ].
+	( ( aYear isKindOf: Integer ) and: [ aYear ~= 0 ] ) ifFalse: [ ^self error: Card ErrorNumeroDeAñoInvalido ].
 
 	^ self new withCardID: aCardID withClientName: aClientName withExpirationMonth: aMonth withExpirationYear: aYear.! !
 
