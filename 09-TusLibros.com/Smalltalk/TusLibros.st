@@ -110,6 +110,15 @@ test06NoSePuedeCrearUnaTarjetaSiElAñoNoEsNumerico
 			self assert: anError messageText = Card ErrorNumeroDeAñoInvalido ].
 		! !
 
+!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:23:09'!
+test07seDebePoderCrearUnaTarjetaValida
+
+	Card  withCardID: '1234567890123454'
+			withClientName: 'Juanito Nieve'
+			withExpirationMonth: 5
+			withExpirationYear: 2015.
+		! !
+
 
 !classDefinition: #TusLibrosTest category: #TusLibros!
 TestCase subclass: #TusLibrosTest
@@ -466,18 +475,18 @@ emptyCartWithEmptyCatalog
 	^ Cart withCatalog: Dictionary new.! !
 
 
-!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 10/31/2017 17:05:44'!
+!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 10/31/2017 19:24:00'!
 expiredCard
 	^ Card
-		withCardID: 1235
+		withCardID: '1234567890123454'
 		withClientName: 'TABARE'
 		withExpirationMonth: 2
 		withExpirationYear: Date today year yearNumber - 1.! !
 
-!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 10/31/2017 17:05:44'!
+!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 10/31/2017 19:23:46'!
 validCard
 	^ Card
-		withCardID: 1235
+		withCardID: '1234567890123454'
 		withClientName: 'TABARE'
-		withExpirationMonth: 2
+		withExpirationMonth: 5
 		withExpirationYear: Date today year yearNumber + 1.! !
