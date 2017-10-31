@@ -5,75 +5,69 @@ TestCase subclass: #TusLibrosTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 12:16:30'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:25:47'!
 test01unCarritoNuevoEstaVacio
-
 	|unCarrito|
-	unCarrito := TestInstanceFactory new emptyCart .
+	unCarrito := TestInstanceFactory new emptyCartWithEmptyCatalog.
 	
 	self assert: unCarrito isEmpty.! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 12:21:09'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:25:57'!
 test02siSeAgregaUnLibroDeLaEditorialAUnCarritoDejaDeSerVacio
 	| aCart |
-	
-	aCart _ TestInstanceFactory new cartWithOneProduct.
+	aCart _ TestInstanceFactory new cartWithAProduct.
+
 	self deny: aCart isEmpty.! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 12:22:54'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:31:45'!
 test03noSePuedenAgregarLIbrosDeOtraEditorialAUnCarrito
-	| aCatalog unCarrito anIsbnNumber |
-	aCatalog _ Dictionary new.
-	anIsbnNumber _ 1235.
-	unCarrito _ Carrito withCatalog: aCatalog.
+	| unCarrito anIsbnNumber |
+	anIsbnNumber _ 1234.
+	unCarrito _ TestInstanceFactory new emptyCartWithEmptyCatalog.
+	
 	self should: [unCarrito add: anIsbnNumber withQuantity: 1 ]
 		 raise: Error
 		 withExceptionDo: [ :anError |
 			self assert: anError messageText = Carrito ErrorItemDebePertenecerAlCatalogo.
 			self assert: unCarrito isEmpty ].! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 12:23:43'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:31:36'!
 test04siSeAgregaUnLibroAlCarritoDebePertenecerAlCarrito
-	| aCatalog unCarrito anIsbnNumber |
-	aCatalog _ Dictionary new.
-	anIsbnNumber _ 1235.
-	aCatalog add: (Association key: anIsbnNumber value: 20).
-	unCarrito _ Carrito withCatalog: aCatalog.
-	unCarrito
-		add: anIsbnNumber
-		withQuantity: 1.
+	| unCarrito anIsbnNumber |
+	anIsbnNumber _ 1234.
+	unCarrito _ TestInstanceFactory new cartWithAProduct .
+
 	self assert: (unCarrito contains: anIsbnNumber).! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 12:25:13'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:35:36'!
 test05noSePuedenAgregarCantidadesNoEnterasDeLibrosAUnCarrito
 	| aCatalog unCarrito anIsbnNumber |
 	anIsbnNumber _ 1234.
 	aCatalog _ Dictionary new.
 	aCatalog add: (Association key: anIsbnNumber value: 20).
-	unCarrito _ Carrito withCatalog: aCatalog.
+	unCarrito := TestInstanceFactory new emptyCartWithCatalog: aCatalog.
+
 	self should: [ unCarrito add: anIsbnNumber withQuantity: 1.5 ]
 		raise: Error
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Carrito ErrorCantidadDeItemsDebeSerEntera.
 			self assert: unCarrito isEmpty ].! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 12:25:56'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:32:28'!
 test06unLibroQueNoSeAgregoAlCarritoNoPerteneceAlCarrito
-	| aCatalog unCarrito anIsbnNumber |
-	aCatalog _ Dictionary new.
-	anIsbnNumber _ 1235.
-	unCarrito _ Carrito withCatalog: aCatalog.
+	| unCarrito anIsbnNumber |
+	anIsbnNumber _ 1234.
+	unCarrito _ TestInstanceFactory new emptyCartWithEmptyCatalog .
 	self deny: (unCarrito contains: anIsbnNumber).! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 12:26:24'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:39:28'!
 test07noSePuedeHacerCheckoutDeUnCarritoVacio
 
-	| aCatalog unCarrito aCashier aCard salesBook |
-	aCatalog _ Dictionary new.
-	unCarrito _ Carrito withCatalog: aCatalog.
+	| aCart aCashier aCard salesBook |
+	aCart _ TestInstanceFactory new emptyCartWithEmptyCatalog .
 	salesBook := OrderedCollection new.
 	aCard := Tarjeta withCardID: 1234 withClientName: 'TABARE'  withExpirationMonth: 2 withExpirationYear: 2019 .
-	aCashier := Cajera withCart: unCarrito withCheckoutDate: Date today withCard: aCard withSalesBook: salesBook.
+	aCashier := Cajera withCart: aCart withCheckoutDate: Date today withCard: aCard withSalesBook: salesBook.
 
 	self
 		should: [ aCashier checkout. ]
@@ -83,21 +77,15 @@ test07noSePuedeHacerCheckoutDeUnCarritoVacio
 			self assert: salesBook isEmpty. ].
 	! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 12:26:54'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:41:28'!
 test08noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 
-	| aCatalog unCarrito aCashier aCard salesBook anIsbnNumber |
-	aCatalog _ Dictionary new.
-	anIsbnNumber _ 1235.
-	aCatalog add: (Association key: anIsbnNumber value: 20).
-	unCarrito _ Carrito withCatalog: aCatalog.
-	unCarrito
-		add: anIsbnNumber
-		withQuantity: 1.
+	| aCart aCashier aCard salesBook |
+	aCart _ TestInstanceFactory new cartWithAProduct.
 	
 	salesBook := OrderedCollection new.
-	aCard := Tarjeta withCardID: 1234 withClientName: 'TABARE'  withExpirationMonth: 2 withExpirationYear: ( ( Date today year yearNumber ) - 1 ) .
-	aCashier := Cajera withCart: unCarrito withCheckoutDate: Date today withCard: aCard withSalesBook: salesBook.
+	aCard := Tarjeta withCardID: 1235 withClientName: 'TABARE'  withExpirationMonth: 2 withExpirationYear: ( ( Date today year yearNumber ) - 1 ) .
+	aCashier := Cajera withCart: aCart withCheckoutDate: Date today withCard: aCard withSalesBook: salesBook.
 	
 	self
 		should: [ aCashier checkout. ]
@@ -106,7 +94,7 @@ test08noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 			self assert: anError messageText = Cajera ErrorTarjetaVencida.
 			self assert: salesBook isEmpty. ].! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/30/2017 21:33:27'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'lm 10/31/2017 13:41:52'!
 test09checkoutConTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
 
 	| aCatalog unCarrito aCashier aCard salesBook anIsbnNumber totalAmount |
@@ -114,9 +102,7 @@ test09checkoutConTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarrito
 	anIsbnNumber _ 1235.
 	aCatalog add: ( Association key: anIsbnNumber value: 20).
 	unCarrito _ Carrito withCatalog: aCatalog.
-	unCarrito
-		add: anIsbnNumber
-		withQuantity: 2.
+	unCarrito add: anIsbnNumber withQuantity: 2.
 	
 	salesBook := OrderedCollection new.
 	aCard := Tarjeta withCardID: 1234 withClientName: 'TABARE'  withExpirationMonth: 2 withExpirationYear: ( ( Date today year yearNumber ) + 1 ) .
@@ -286,14 +272,14 @@ withCardID: aCardID withClientName: aClientName withExpirationMonth: aMonth with
 
 
 !classDefinition: #TestInstanceFactory category: #TusLibros!
-ProtoObject subclass: #TestInstanceFactory
+Object subclass: #TestInstanceFactory
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TestInstanceFactory methodsFor: 'cartInstances' stamp: 'lm 10/31/2017 12:19:41'!
-cartWithOneProduct
+!TestInstanceFactory methodsFor: 'cartInstances' stamp: 'lm 10/31/2017 13:13:11'!
+cartWithAProduct
 	| aCatalog aCart anIsbnNumber |
 	
 	anIsbnNumber _ 1234.
@@ -305,7 +291,21 @@ cartWithOneProduct
 	aCart add: anIsbnNumber withQuantity: 1.
 	^aCart.! !
 
-!TestInstanceFactory methodsFor: 'cartInstances' stamp: 'lm 10/30/2017 21:35:48'!
-emptyCart
+!TestInstanceFactory methodsFor: 'cartInstances' stamp: 'lm 10/31/2017 13:14:25'!
+cartWithProduct: anIsbnNumber withCatalog: aCatalog
+	| aCart|
+	
+	aCart _ Carrito withCatalog: aCatalog.
+	aCart add: anIsbnNumber withQuantity: 1.
+	^aCart.! !
+
+!TestInstanceFactory methodsFor: 'cartInstances' stamp: 'lm 10/31/2017 13:28:00'!
+emptyCartWithCatalog: aCatalog
+	| aCart|
+	aCart _ Carrito withCatalog: aCatalog.
+	^aCart.! !
+
+!TestInstanceFactory methodsFor: 'cartInstances' stamp: 'lm 10/31/2017 13:12:28'!
+emptyCartWithEmptyCatalog
 
 	^Carrito withCatalog: Dictionary new.! !
