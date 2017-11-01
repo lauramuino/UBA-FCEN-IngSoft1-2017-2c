@@ -205,8 +205,8 @@ TestCase subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
-test07noSePuedeHacerCheckoutDeUnCarritoVacio
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:50:58'!
+test01noSePuedeHacerCheckoutDeUnCarritoVacio
 	| aCart aCashier aCard salesBook |
 	aCart _ testInstanceFactory emptyCartWithEmptyCatalog.
 	salesBook _ OrderedCollection new.
@@ -223,8 +223,8 @@ test07noSePuedeHacerCheckoutDeUnCarritoVacio
 			self assert: anError messageText = Cashier ErrorCheckOutDeCarritoVacio.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
-test08noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:51:07'!
+test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 	| aCart aCashier aCard salesBook |
 	aCart _ testInstanceFactory cartWithAProduct.
 	salesBook _ OrderedCollection new.
@@ -241,8 +241,8 @@ test08noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 			self assert: anError messageText = Cashier ErrorTarjetaVencida.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
-test09checkoutConTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:51:17'!
+test03checkoutConTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
 	| aCatalog unCarrito aCashier aCard salesBook anIsbnNumber totalAmount |
 	aCatalog _ Dictionary new.
 	anIsbnNumber _ 1235.
