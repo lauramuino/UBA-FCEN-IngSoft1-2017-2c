@@ -5,7 +5,7 @@ TestCase subclass: #CardTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:09:33'!
+!CardTest methodsFor: 'testing' stamp: 'ad 10/31/2017 19:09:33'!
 test01NoSePuedeCrearUnaTarjetaSiSuIDNoSon16Digitos
 	
 	self should:
@@ -20,7 +20,7 @@ test01NoSePuedeCrearUnaTarjetaSiSuIDNoSon16Digitos
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Card ErrorCardIDMustHave16Digits ].! !
 
-!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:10:50'!
+!CardTest methodsFor: 'testing' stamp: 'ad 10/31/2017 19:10:50'!
 test02NoSePuedeCrearUnaTarjetaConUnNombreVacioDeCliente
 	self
 		should: [
@@ -33,7 +33,7 @@ test02NoSePuedeCrearUnaTarjetaConUnNombreVacioDeCliente
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Card ErrorClientNameCannotBeEmpty ].! !
 
-!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:11:20'!
+!CardTest methodsFor: 'testing' stamp: 'ad 10/31/2017 19:11:20'!
 test03NoSePuedeCrearUnaTarjetaSiElNombreDelClienteNoSonLetrasConEspacios
 	self
 		should: [
@@ -46,7 +46,7 @@ test03NoSePuedeCrearUnaTarjetaSiElNombreDelClienteNoSonLetrasConEspacios
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Card ErrorClientNameCannotBeEmpty ].! !
 
-!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:20:19'!
+!CardTest methodsFor: 'testing' stamp: 'ad 10/31/2017 19:20:19'!
 test04NoSePuedeCrearUnaTarjetaSiElMesNoEsNumerico
 	self
 		should: [
@@ -59,7 +59,7 @@ test04NoSePuedeCrearUnaTarjetaSiElMesNoEsNumerico
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Card ErrorNumeroDeMesInvalido ].! !
 
-!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:20:35'!
+!CardTest methodsFor: 'testing' stamp: 'ad 10/31/2017 19:20:35'!
 test05NoSePuedeCrearUnaTarjetaSiElMesNoEsUnNumeroEntre1y12
 	self
 		should: [
@@ -82,7 +82,7 @@ test05NoSePuedeCrearUnaTarjetaSiElMesNoEsUnNumeroEntre1y12
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Card ErrorNumeroDeMesInvalido ].! !
 
-!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:20:49'!
+!CardTest methodsFor: 'testing' stamp: 'ad 10/31/2017 19:20:49'!
 test06NoSePuedeCrearUnaTarjetaSiElAñoEsEl0
 	self
 		should: [
@@ -96,7 +96,7 @@ test06NoSePuedeCrearUnaTarjetaSiElAñoEsEl0
 			self assert: anError messageText = Card ErrorNumeroDeAñoInvalido ].
 		! !
 
-!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:20:08'!
+!CardTest methodsFor: 'testing' stamp: 'ad 10/31/2017 19:20:08'!
 test06NoSePuedeCrearUnaTarjetaSiElAñoNoEsNumerico
 	self
 		should: [
@@ -110,7 +110,7 @@ test06NoSePuedeCrearUnaTarjetaSiElAñoNoEsNumerico
 			self assert: anError messageText = Card ErrorNumeroDeAñoInvalido ].
 		! !
 
-!CardTest methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 19:23:09'!
+!CardTest methodsFor: 'testing' stamp: 'ad 10/31/2017 19:23:09'!
 test07seDebePoderCrearUnaTarjetaValida
 
 	Card  withCardID: '1234567890123454'
@@ -120,28 +120,28 @@ test07seDebePoderCrearUnaTarjetaValida
 		! !
 
 
-!classDefinition: #TusLibrosTest category: #TusLibros!
-TestCase subclass: #TusLibrosTest
+!classDefinition: #CartTest category: #TusLibros!
+TestCase subclass: #CartTest
 	instanceVariableNames: 'testInstanceFactory'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:04:56'!
+!CartTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:45:58'!
 test01unCarritoNuevoEstaVacio
 	|unCarrito|
 	unCarrito := testInstanceFactory emptyCartWithEmptyCatalog.
 	
 	self assert: unCarrito isEmpty.! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:04:51'!
+!CartTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:46:03'!
 test02siSeAgregaUnLibroDeLaEditorialAUnCarritoDejaDeSerVacio
 	| aCart |
 	aCart _  testInstanceFactory cartWithAProduct.
 
 	self deny: aCart isEmpty.! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:05:07'!
+!CartTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:46:11'!
 test03noSePuedenAgregarLIbrosDeOtraEditorialAUnCarrito
 	| unCarrito anIsbnNumber |
 	anIsbnNumber _ 1234.
@@ -156,7 +156,7 @@ test03noSePuedenAgregarLIbrosDeOtraEditorialAUnCarrito
 			self assert: anError messageText = Cart ErrorItemDebePertenecerAlCatalogo.
 			self assert: unCarrito isEmpty ].! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:04:38'!
+!CartTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:46:17'!
 test04siSeAgregaUnLibroAlCarritoDebePertenecerAlCarrito
 	| unCarrito anIsbnNumber |
 	anIsbnNumber _ 1234.
@@ -164,7 +164,7 @@ test04siSeAgregaUnLibroAlCarritoDebePertenecerAlCarrito
 
 	self assert: (unCarrito contains: anIsbnNumber).! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:05:07'!
+!CartTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:46:24'!
 test05noSePuedenAgregarCantidadesNoEnterasDeLibrosAUnCarrito
 	| aCatalog unCarrito anIsbnNumber |
 	anIsbnNumber _ 1234.
@@ -184,14 +184,28 @@ test05noSePuedenAgregarCantidadesNoEnterasDeLibrosAUnCarrito
 			self assert: anError messageText = Cart ErrorCantidadDeItemsDebeSerEntera.
 			self assert: unCarrito isEmpty ].! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:04:13'!
+!CartTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:46:34'!
 test06unLibroQueNoSeAgregoAlCarritoNoPerteneceAlCarrito
 	| unCarrito anIsbnNumber |
 	anIsbnNumber _ 1234.
 	unCarrito _ testInstanceFactory emptyCartWithEmptyCatalog .
 	self deny: (unCarrito contains: anIsbnNumber).! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
+
+!CartTest methodsFor: 'setup' stamp: 'ad 11/1/2017 13:46:47'!
+setUp
+
+	testInstanceFactory := TestInstanceFactory new.! !
+
+
+!classDefinition: #CashierTest category: #TusLibros!
+TestCase subclass: #CashierTest
+	instanceVariableNames: 'testInstanceFactory'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!CashierTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
 test07noSePuedeHacerCheckoutDeUnCarritoVacio
 	| aCart aCashier aCard salesBook |
 	aCart _ testInstanceFactory emptyCartWithEmptyCatalog.
@@ -209,7 +223,7 @@ test07noSePuedeHacerCheckoutDeUnCarritoVacio
 			self assert: anError messageText = Cashier ErrorCheckOutDeCarritoVacio.
 			self assert: salesBook isEmpty ].! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
 test08noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 	| aCart aCashier aCard salesBook |
 	aCart _ testInstanceFactory cartWithAProduct.
@@ -227,7 +241,7 @@ test08noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 			self assert: anError messageText = Cashier ErrorTarjetaVencida.
 			self assert: salesBook isEmpty ].! !
 
-!TusLibrosTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 10/31/2017 17:06:00'!
 test09checkoutConTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
 	| aCatalog unCarrito aCashier aCard salesBook anIsbnNumber totalAmount |
 	aCatalog _ Dictionary new.
@@ -252,7 +266,7 @@ test09checkoutConTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarrito
 	salesBook find: unCarrito.! !
 
 
-!TusLibrosTest methodsFor: 'setUp' stamp: 'ad 10/31/2017 17:02:52'!
+!CashierTest methodsFor: 'setUp' stamp: 'ad 10/31/2017 17:02:52'!
 setUp
 
 	testInstanceFactory := TestInstanceFactory new.! !
