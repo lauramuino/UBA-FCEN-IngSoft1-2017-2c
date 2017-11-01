@@ -205,7 +205,7 @@ TestCase subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:50:58'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:55:24'!
 test01noSePuedeHacerCheckoutDeUnCarritoVacio
 	| aCart aCashier aCard salesBook |
 	aCart _ testInstanceFactory emptyCartWithEmptyCatalog.
@@ -215,7 +215,8 @@ test01noSePuedeHacerCheckoutDeUnCarritoVacio
 		withCart: aCart
 		withCheckoutDate: Date today
 		withCard: aCard
-		withSalesBook: salesBook.
+		withSalesBook: salesBook
+		 withMerchantProcessor: self.
 	self
 		should: [ aCashier checkout ]
 		raise: Error
@@ -223,7 +224,7 @@ test01noSePuedeHacerCheckoutDeUnCarritoVacio
 			self assert: anError messageText = Cashier ErrorCheckOutDeCarritoVacio.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:51:07'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:55:35'!
 test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 	| aCart aCashier aCard salesBook |
 	aCart _ testInstanceFactory cartWithAProduct.
@@ -233,7 +234,8 @@ test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 		withCart: aCart
 		withCheckoutDate: Date today
 		withCard: aCard
-		withSalesBook: salesBook.
+		withSalesBook: salesBook
+		 withMerchantProcessor: self.
 	self
 		should: [ aCashier checkout ]
 		raise: Error
@@ -241,8 +243,27 @@ test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 			self assert: anError messageText = Cashier ErrorTarjetaVencida.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:51:17'!
-test03checkoutConTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 14:16:14'!
+test03noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaRobada
+	| aCart aCashier aCard salesBook |
+	aCart _ testInstanceFactory cartWithAProduct.
+	salesBook _ OrderedCollection new.
+	aCard _ testInstanceFactory stolenCard.
+	aCashier _ Cashier
+		withCart: aCart
+		withCheckoutDate: Date today
+		withCard: aCard
+		withSalesBook: salesBook
+		withMerchantProcessor: self.
+	self
+		should: [ aCashier checkout ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = 'tarjeta robada'.
+			self assert: salesBook isEmpty ].! !
+
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 14:16:05'!
+test04checkoutConCarritoNoVacioYTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
 	| aCatalog unCarrito aCashier aCard salesBook anIsbnNumber totalAmount |
 	aCatalog _ Dictionary new.
 	anIsbnNumber _ 1235.
@@ -260,7 +281,8 @@ test03checkoutConTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarrito
 		withCart: unCarrito
 		withCheckoutDate: Date today
 		withCard: aCard
-		withSalesBook: salesBook.
+		withSalesBook: salesBook
+		withMerchantProcessor: self.
 	totalAmount _ aCashier checkout.
 	self assert: totalAmount = 40.
 	salesBook find: unCarrito.! !
@@ -271,6 +293,15 @@ setUp
 
 	testInstanceFactory := TestInstanceFactory new.! !
 
+
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'ad 11/1/2017 14:25:09'!
+debitAmount: anAmount withCard: aCard
+
+	( aCard isStolen ) ifTrue: [ ^ { 200. 1. 'tarjeta robada' } ].
+	^ {200. 0. '123' } .
+	
+	"Ver si vamos a tener una clase HTTP response para tener el codigo de retorno y el mensaje/id"! !
+
 
 !classDefinition: #Card category: #TusLibros!
 Object subclass: #Card
@@ -278,6 +309,11 @@ Object subclass: #Card
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!Card methodsFor: 'as yet unclassified' stamp: 'ad 11/1/2017 14:11:57'!
+isStolen
+	"Ver si esto hay que sacarlo ya que despues el mp va a ser el que sabe si la tarjeta esta vencida -- por ahora se usa para el test de tarjeta robada"
+	^ cardID = '1234567890123456'.! !
 
 !Card methodsFor: 'as yet unclassified' stamp: 'lm 10/30/2017 20:50:39'!
 validateWithDate: aDate
@@ -406,25 +442,34 @@ ErrorItemDebePertenecerAlCatalogo
 
 !classDefinition: #Cashier category: #TusLibros!
 Object subclass: #Cashier
-	instanceVariableNames: 'checkoutDate cart card salesBook'
+	instanceVariableNames: 'checkoutDate cart card salesBook mp'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 10/31/2017 17:06:00'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 11/1/2017 14:24:14'!
 checkout
+
+	| totalAmount returnCode |
+	
 	cart isEmpty ifTrue: [ ^ self error: Cashier ErrorCheckOutDeCarritoVacio ].
 	(card validateWithDate: checkoutDate) ifTrue: [ self error: Cashier ErrorTarjetaVencida ].
-	salesBook add: cart.
-	^ cart totalAmountOfItems.! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'lm 10/30/2017 20:57:09'!
-withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook
+	totalAmount := cart totalAmountOfItems.		
+	returnCode := mp debitAmount: totalAmount withCard: card.
+	( ( returnCode at: 1 ) = 200 and: [ ( returnCode at: 2 ) = 0 ] ) ifTrue: [ salesBook add: cart ].
+	( ( returnCode at: 1 ) = 200 and: [ ( returnCode at: 2 ) = 1 ] ) ifTrue: [ self error: ( returnCode at: 3 ) ].
+	
+	^ totalAmount.! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 11/1/2017 13:54:55'!
+withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook  withMerchantProcessor: aMP
 
 	cart:= aCart.
 	checkoutDate:= aDate. 
 	card := aCard.
 	salesBook := aSalesBook.
+	mp := aMP.
 	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -441,10 +486,10 @@ ErrorCheckOutDeCarritoVacio
 ErrorTarjetaVencida
 	^ 'No se puede hacer checkout de un carrito con una tarjeta vencida'.! !
 
-!Cashier class methodsFor: 'error message' stamp: 'lm 10/30/2017 20:54:37'!
-withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook
+!Cashier class methodsFor: 'error message' stamp: 'ad 11/1/2017 13:54:40'!
+withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook withMerchantProcessor: aMP
 
-	^self new withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook! !
+	^self new withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook withMerchantProcessor: aMP! !
 
 
 !classDefinition: #TestInstanceFactory category: #TusLibros!
@@ -496,6 +541,14 @@ expiredCard
 		withClientName: 'TABARE'
 		withExpirationMonth: 2
 		withExpirationYear: Date today year yearNumber - 1.! !
+
+!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 11/1/2017 14:09:24'!
+stolenCard
+	^ Card
+		withCardID: '1234567890123456'
+		withClientName: 'TABARE'
+		withExpirationMonth: 2
+		withExpirationYear: Date today year yearNumber + 1.! !
 
 !TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 10/31/2017 19:23:46'!
 validCard
