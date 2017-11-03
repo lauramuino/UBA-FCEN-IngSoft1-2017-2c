@@ -200,7 +200,7 @@ setUp
 
 !classDefinition: #CashierTest category: #TusLibros!
 TestCase subclass: #CashierTest
-	instanceVariableNames: 'testInstanceFactory'
+	instanceVariableNames: 'testInstanceFactory debitSimulator'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -243,28 +243,29 @@ test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 			self assert: anError messageText = Cashier ErrorTarjetaVencida.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 14:16:14'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/2/2017 19:32:52'!
 test03noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaRobada
-	| aCart aCashier aCard salesBook |
+	| aCart aCashier salesBook |
 	aCart _ testInstanceFactory cartWithAProduct.
 	salesBook _ OrderedCollection new.
-	aCard _ testInstanceFactory stolenCard.
 	aCashier _ Cashier
 		withCart: aCart
 		withCheckoutDate: Date today
-		withCard: aCard
+		withCard: testInstanceFactory stolenCard
 		withSalesBook: salesBook
 		withMerchantProcessor: self.
+		
+	debitSimulator := [ :anAmount :aCard | self error: Cashier ErrorTarjetaRobada ].	
 	self
 		should: [ aCashier checkout ]
 		raise: Error
 		withExceptionDo: [ :anError |
-			self assert: anError messageText = 'tarjeta robada'.
+			self assert: anError messageText = Cashier ErrorTarjetaRobada .
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/1/2017 14:16:05'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/2/2017 19:35:10'!
 test04checkoutConCarritoNoVacioYTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
-	| aCatalog unCarrito aCashier aCard salesBook anIsbnNumber totalAmount |
+	| aCatalog unCarrito aCashier salesBook anIsbnNumber totalAmount |
 	aCatalog _ Dictionary new.
 	anIsbnNumber _ 1235.
 	aCatalog add:
@@ -276,16 +277,54 @@ test04checkoutConCarritoNoVacioYTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAs
 		add: anIsbnNumber
 		withQuantity: 2.
 	salesBook _ OrderedCollection new.
-	aCard _ testInstanceFactory validCard.
 	aCashier _ Cashier
 		withCart: unCarrito
 		withCheckoutDate: Date today
-		withCard: aCard
+		withCard: testInstanceFactory validCard
 		withSalesBook: salesBook
 		withMerchantProcessor: self.
+	debitSimulator := [ :anAmount :aCard |  ].	
 	totalAmount _ aCashier checkout.
 	self assert: totalAmount = 40.
 	salesBook find: unCarrito.! !
+
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/2/2017 19:38:26'!
+test05noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaSinFondos
+	| aCart aCashier salesBook |
+	aCart _ testInstanceFactory cartWithAProduct.
+	salesBook _ OrderedCollection new.
+	aCashier _ Cashier
+		withCart: aCart
+		withCheckoutDate: Date today
+		withCard: testInstanceFactory stolenCard
+		withSalesBook: salesBook
+		withMerchantProcessor: self.
+		
+	debitSimulator := [ :anAmount :aCard | self error: Cashier ErrorTarjetaSinFondos ].	
+	self
+		should: [ aCashier checkout ]
+		raise: Error
+		withExceptionDo: [ :anError |
+			self assert: anError messageText = Cashier ErrorTarjetaSinFondos.
+			self assert: salesBook isEmpty ].! !
+
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/2/2017 19:56:18'!
+test06seDebitaElMontoCorrectoConLaTarjetaCorrecta
+	| aCart aCashier salesBook amount card userCard checkoutAmount |
+	aCart _ testInstanceFactory cartWithAProduct.
+	salesBook _ OrderedCollection new.
+	userCard := testInstanceFactory validCard.
+	aCashier _ Cashier
+		withCart: aCart
+		withCheckoutDate: Date today
+		withCard: userCard
+		withSalesBook: salesBook
+		withMerchantProcessor: self.
+		
+	debitSimulator := [ :anAmount :aCard | amount := anAmount. card := aCard ].	
+	checkoutAmount := aCashier checkout.
+	self assert: amount = checkoutAmount.
+	self assert: userCard = card.! !
 
 
 !CashierTest methodsFor: 'setUp' stamp: 'ad 10/31/2017 17:02:52'!
@@ -294,13 +333,59 @@ setUp
 	testInstanceFactory := TestInstanceFactory new.! !
 
 
-!CashierTest methodsFor: 'as yet unclassified' stamp: 'ad 11/1/2017 14:25:09'!
+!CashierTest methodsFor: 'mp simulator' stamp: 'ad 11/2/2017 19:28:43'!
 debitAmount: anAmount withCard: aCard
 
-	( aCard isStolen ) ifTrue: [ ^ { 200. 1. 'tarjeta robada' } ].
-	^ {200. 0. '123' } .
+	^debitSimulator value: anAmount value: aCard.
+! !
+
+
+!classDefinition: #RESTest category: #TusLibros!
+TestCase subclass: #RESTest
+	instanceVariableNames: 'testInstanceFactory usersDataBase'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!RESTest methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:36:23'!
+authenticateUser: userID withPassword: password.
+
+	( ( usersDataBase includesKey: userID ) and: [ (usersDataBase at: userID ) = password ] ) ifFalse: [ ^ self error: RestInterface ErrorInvalidUser ].! !
+
+!RESTest methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:30:27'!
+setUp
+
+	testInstanceFactory := TestInstanceFactory new.
+	usersDataBase := Dictionary new.
+	usersDataBase add: ( Association key: ( testInstanceFactory validUserID ) value: ( testInstanceFactory validPassword ) ).! !
+
+!RESTest methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:32:12'!
+test01noSePuedeLoguearConUnUsuarioOContraseñaInvalidos
+
+	| restInterface |
 	
-	"Ver si vamos a tener una clase HTTP response para tener el codigo de retorno y el mensaje/id"! !
+	restInterface := RestInterface withAuthenticator: self.
+	self should: [ restInterface createCartWithUser: ( testInstanceFactory invalidUserID ) withPassword: ( testInstanceFactory invalidPassword ).]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText =  RestInterface ErrorInvalidUser. ].
+		 
+	self should: [ restInterface createCartWithUser: ( testInstanceFactory validUserID ) withPassword: ( testInstanceFactory invalidPassword ).]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: anError messageText =  RestInterface ErrorInvalidUser. ].
+	
+	! !
+
+!RESTest methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:41:49'!
+test02crearUnCarritoConUsuarioYContraseñaValidosGeneraUnCarritoVacio
+
+	| restInterface cartID |
+	
+	restInterface := RestInterface withAuthenticator: self.
+	cartID := restInterface createCartWithUser: ( testInstanceFactory validUserID ) withPassword: ( testInstanceFactory validPassword ).
+	
+	self assert: ( restInterface listCart: cartID ) isEmpty.! !
 
 
 !classDefinition: #Card category: #TusLibros!
@@ -309,11 +394,6 @@ Object subclass: #Card
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
-
-!Card methodsFor: 'as yet unclassified' stamp: 'ad 11/1/2017 14:11:57'!
-isStolen
-	"Ver si esto hay que sacarlo ya que despues el mp va a ser el que sabe si la tarjeta esta vencida -- por ahora se usa para el test de tarjeta robada"
-	^ cardID = '1234567890123456'.! !
 
 !Card methodsFor: 'as yet unclassified' stamp: 'lm 10/30/2017 20:50:39'!
 validateWithDate: aDate
@@ -447,18 +527,17 @@ Object subclass: #Cashier
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 11/1/2017 14:24:14'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 19:37:34'!
 checkout
 
-	| totalAmount returnCode |
+	| totalAmount |
 	
 	cart isEmpty ifTrue: [ ^ self error: Cashier ErrorCheckOutDeCarritoVacio ].
 	(card validateWithDate: checkoutDate) ifTrue: [ self error: Cashier ErrorTarjetaVencida ].
 
 	totalAmount := cart totalAmountOfItems.		
-	returnCode := mp debitAmount: totalAmount withCard: card.
-	( ( returnCode at: 1 ) = 200 and: [ ( returnCode at: 2 ) = 0 ] ) ifTrue: [ salesBook add: cart ].
-	( ( returnCode at: 1 ) = 200 and: [ ( returnCode at: 2 ) = 1 ] ) ifTrue: [ self error: ( returnCode at: 3 ) ].
+	mp debitAmount: totalAmount withCard: card.
+	salesBook add: cart.
 	
 	^ totalAmount.! !
 
@@ -482,6 +561,14 @@ Cashier class
 ErrorCheckOutDeCarritoVacio
 	^ 'No se puede hacer checkout de un carrito vacio'.! !
 
+!Cashier class methodsFor: 'error message' stamp: 'ad 11/2/2017 19:32:28'!
+ErrorTarjetaRobada
+	^ 'No se puede hacer checkout de un carrito con una tarjeta robada'.! !
+
+!Cashier class methodsFor: 'error message' stamp: 'ad 11/2/2017 19:38:04'!
+ErrorTarjetaSinFondos
+	^ 'La tarjeta no tiene fondos'.! !
+
 !Cashier class methodsFor: 'error message' stamp: 'lm 10/30/2017 18:58:18'!
 ErrorTarjetaVencida
 	^ 'No se puede hacer checkout de un carrito con una tarjeta vencida'.! !
@@ -490,6 +577,45 @@ ErrorTarjetaVencida
 withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook withMerchantProcessor: aMP
 
 	^self new withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook withMerchantProcessor: aMP! !
+
+
+!classDefinition: #RestInterface category: #TusLibros!
+Object subclass: #RestInterface
+	instanceVariableNames: 'authenticator'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:23:34'!
+createCartWithUser: userID withPassword: password 
+
+	authenticator authenticateUser: userID withPassword: password.! !
+
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:42:11'!
+listCart: aRestInterface 
+	
+	^ Dictionary new.! !
+
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:21:09'!
+withAuthenticator: anAuthenticator
+
+	authenticator := anAuthenticator.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'RestInterface class' category: #TusLibros!
+RestInterface class
+	instanceVariableNames: ''!
+
+!RestInterface class methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:33:16'!
+ErrorInvalidUser
+
+	^'Usuario o contraseña inexistentes'.! !
+
+!RestInterface class methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:20:45'!
+withAuthenticator: anAuthenticator
+	
+	^ self new withAuthenticator: anAuthenticator.! !
 
 
 !classDefinition: #TestInstanceFactory category: #TusLibros!
@@ -542,6 +668,16 @@ expiredCard
 		withExpirationMonth: 2
 		withExpirationYear: Date today year yearNumber - 1.! !
 
+!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 11/2/2017 20:31:10'!
+invalidPassword
+
+	^'123456'.! !
+
+!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 11/2/2017 20:31:02'!
+invalidUserID
+
+	^'juancito'.! !
+
 !TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 11/1/2017 14:09:24'!
 stolenCard
 	^ Card
@@ -557,3 +693,13 @@ validCard
 		withClientName: 'TABARE'
 		withExpirationMonth: 5
 		withExpirationYear: Date today year yearNumber + 1.! !
+
+!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 11/2/2017 20:26:15'!
+validPassword
+
+	^'1234'.! !
+
+!TestInstanceFactory methodsFor: 'cardInstances' stamp: 'ad 11/2/2017 20:26:07'!
+validUserID
+
+	^'pepe'.! !
