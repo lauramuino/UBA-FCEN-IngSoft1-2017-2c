@@ -208,7 +208,7 @@ TestCase subclass: #CashierTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 14:26:49'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 17:08:51'!
 test01noSePuedeHacerCheckoutDeUnCarritoVacio
 	| aCart aCashier aCard salesBook |
 	aCart _ testInstanceFactory emptyCartWithEmptyCatalog.
@@ -216,6 +216,7 @@ test01noSePuedeHacerCheckoutDeUnCarritoVacio
 	aCard _ testInstanceFactory validCard.
 	aCashier _ Cashier
 		withCart: aCart
+		withCartID: 1
 		withCheckoutDate: Date today
 		withCard: aCard
 		withSalesBook: salesBook
@@ -227,7 +228,7 @@ test01noSePuedeHacerCheckoutDeUnCarritoVacio
 			self assert: anError messageText = Cashier ErrorCheckOutDeCarritoVacio.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 14:26:59'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 17:08:54'!
 test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 	| aCart aCashier aCard salesBook |
 	aCart _ testInstanceFactory cartWithAProduct.
@@ -235,6 +236,7 @@ test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 	aCard _ testInstanceFactory expiredCard.
 	aCashier _ Cashier
 		withCart: aCart
+		withCartID: 1
 		withCheckoutDate: Date today
 		withCard: aCard
 		withSalesBook: salesBook
@@ -246,13 +248,14 @@ test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 			self assert: anError messageText = Cashier ErrorTarjetaVencida.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 14:28:48'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 17:08:57'!
 test03noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaRobada
 	| aCart aCashier salesBook |
 	aCart _ testInstanceFactory cartWithAProduct.
 	salesBook _ OrderedCollection new.
 	aCashier _ Cashier
 		withCart: aCart
+		withCartID: 1
 		withCheckoutDate: Date today
 		withCard: testInstanceFactory stolenCard
 		withSalesBook: salesBook
@@ -264,7 +267,7 @@ test03noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaRobada
 			self assert: anError messageText = Cashier ErrorTarjetaRobada .
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 14:27:23'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 17:09:02'!
 test04checkoutConCarritoNoVacioYTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
 	| aCatalog unCarrito aCashier salesBook anIsbnNumber totalAmount |
 	aCatalog _ Dictionary new.
@@ -273,7 +276,7 @@ test04checkoutConCarritoNoVacioYTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAs
 	unCarrito _ Cart withCatalog: aCatalog.
 	unCarrito add: anIsbnNumber withQuantity: 2.
 	salesBook _ OrderedCollection new.
-	aCashier _ Cashier withCart: unCarrito withCheckoutDate: Date today
+	aCashier _ Cashier withCart: unCarrito withCartID: 1 withCheckoutDate: Date today
 		withCard: testInstanceFactory validCard withSalesBook: salesBook
 		withMerchantProcessor: ( testInstanceFactory defaultMPSimulator ).
 		
@@ -281,13 +284,14 @@ test04checkoutConCarritoNoVacioYTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAs
 	self assert: totalAmount = 40.
 	self deny: (salesBook find: unCarrito) < 0.! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 14:29:52'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 17:09:05'!
 test05noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaSinFondos
 	| aCart aCashier salesBook |
 	aCart _ testInstanceFactory cartWithAProduct.
 	salesBook _ OrderedCollection new.
 	aCashier _ Cashier
 		withCart: aCart
+		withCartID: 1
 		withCheckoutDate: Date today
 		withCard: testInstanceFactory stolenCard
 		withSalesBook: salesBook
@@ -299,7 +303,7 @@ test05noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaSinFondos
 			self assert: anError messageText = Cashier ErrorTarjetaSinFondos.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 14:29:35'!
+!CashierTest methodsFor: 'testing' stamp: 'ad 11/5/2017 17:09:08'!
 test06seDebitaElMontoCorrectoConLaTarjetaCorrecta
 	| aCart aCashier salesBook amount card userCard checkoutAmount |
 	aCart _ testInstanceFactory cartWithAProduct.
@@ -307,6 +311,7 @@ test06seDebitaElMontoCorrectoConLaTarjetaCorrecta
 	userCard := testInstanceFactory validCard.
 	aCashier _ Cashier
 		withCart: aCart
+		withCartID: 1
 		withCheckoutDate: Date today
 		withCard: userCard
 		withSalesBook: salesBook
@@ -336,22 +341,6 @@ TestCase subclass: #RestInterfaceTest
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
-
-!RestInterfaceTest methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 12:27:14'!
-TESTEXTRA
-	| restInterface cartID aCatalog |
-	restInterface _ RestInterface withAuthenticator: self.
-	cartID _ restInterface
-		createCartWithUser: testInstanceFactory validUserID
-		withPassword: testInstanceFactory validPassword.
-	aCatalog _ Bag new.
-	aCatalog add: 1234.
-	restInterface
-		addToCart: cartID
-		product: 1234
-		withQuantity: 1
-		withCatalog: aCatalog.
-	self deny: (restInterface listCart: cartID) isEmpty.! !
 
 !RestInterfaceTest methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:36:23'!
 authenticateUser: userID withPassword: password.
@@ -923,12 +912,12 @@ ErrorItemDebePertenecerAlCatalogo
 
 !classDefinition: #Cashier category: #TusLibros!
 Object subclass: #Cashier
-	instanceVariableNames: 'checkoutDate cart card salesBook mp'
+	instanceVariableNames: 'checkoutDate cart card salesBook mp withCartID cartID'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 19:37:34'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 17:08:16'!
 checkout
 
 	| totalAmount |
@@ -938,18 +927,23 @@ checkout
 
 	totalAmount := cart totalAmountOfItems.		
 	mp debitAmount: totalAmount withCard: card.
-	salesBook add: cart.
+	"salesBook add: cart."
+	salesBook add:
+		(Association
+			key: cartID
+			value: cart ).
 	
 	^ totalAmount.! !
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 11/1/2017 13:54:55'!
-withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook  withMerchantProcessor: aMP
+!Cashier methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 17:08:09'!
+withCart: aCart withCartID: aCartID withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook  withMerchantProcessor: aMP
 
 	cart:= aCart.
 	checkoutDate:= aDate. 
 	card := aCard.
 	salesBook := aSalesBook.
 	mp := aMP.
+	cartID := aCartID.
 	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
@@ -974,10 +968,10 @@ ErrorTarjetaSinFondos
 ErrorTarjetaVencida
 	^ 'No se puede hacer checkout de un carrito con una tarjeta vencida'.! !
 
-!Cashier class methodsFor: 'error message' stamp: 'ad 11/1/2017 13:54:40'!
-withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook withMerchantProcessor: aMP
+!Cashier class methodsFor: 'error message' stamp: 'ad 11/5/2017 17:07:06'!
+withCart: aCart withCartID: aCartID withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook withMerchantProcessor: aMP
 
-	^self new withCart: aCart withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook withMerchantProcessor: aMP! !
+	^self new withCart: aCart withCartID: aCartID withCheckoutDate: aDate withCard: aCard withSalesBook: aSalesBook withMerchantProcessor: aMP! !
 
 
 !classDefinition: #MPSimulator category: #TusLibros!
@@ -1011,87 +1005,48 @@ withDebitSimulator: aDebitSimulator
 
 !classDefinition: #RestInterface category: #TusLibros!
 Object subclass: #RestInterface
-	instanceVariableNames: 'authenticator user catalog cartList historicPurchasedCarts lastCardID cartsLastUsedTime'
+	instanceVariableNames: 'authenticator catalog lastCardID session'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:07:57'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:57:59'!
 addToCart: aCartID product: anIsbn withQuantity: aQuantity
 			
-	( self getCart: aCartID )	add: anIsbn withQuantity: aQuantity.! !
+	( session getCart: aCartID )	add: anIsbn withQuantity: aQuantity.! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:10:48'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 17:09:19'!
 checkoutWithCartID: aCartID withCard: aCard withCheckoutDate: aDate withSalesBook: aSalesBook withMerchantProcessor: aMP
 	(Cashier
-		withCart: (self getCart: aCartID)
+		withCart: (session getCart: aCartID)
+		withCartID: aCartID
 		withCheckoutDate: aDate
 		withCard: aCard
 		withSalesBook: aSalesBook
 		withMerchantProcessor: aMP) checkout.
-	historicPurchasedCarts add:
-		(Association
-			key: aCartID
-			value: (cartList at: aCartID)).
-	cartList removeKey: aCartID.! !
+		
+	session checkoutCartID: aCartID.! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 15:56:29'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 17:00:08'!
 createCart
 	
 	|cartID|
 	
 	cartID := self nextCardID.
 
-	cartList add: ( Association key: cartID value: ( Cart withCatalog: catalog ) ).
-	cartsLastUsedTime add: ( Association key: cartID value: 0 ).
+	session createCart: cartID withCart:  ( Cart withCatalog: catalog ).
 	
 	^cartID.! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:07:36'!
-getCart: aCartID 
-	
-	| cart |
-	
-	(cartList includesKey: aCartID)
-		ifFalse: [
-			( historicPurchasedCarts includesKey: aCartID )
-				ifTrue: [ self error: RestInterface ErrorCarritoCheckouteado ]
-				ifFalse: [ self error: RestInterface ErrorCarritoInvalido ].
-				].
-			
-	cart := ( cartList at: aCartID ).
-	( ( cartsLastUsedTime at: aCartID ) < 30 )	
-		ifTrue: [ ^ cart ]
-		ifFalse: [ 
-			cartList removeKey: aCartID.
-			self error: RestInterface ErrorCarritoInvalido.
-			 ].
-		
-	^ cart.! !
-
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:07:53'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:58:12'!
 listCart: aCartID 
 			
-	^ ( self getCart: aCartID ) listItemsWithQuantities.	! !
+	^ ( session getCart: aCartID ) listItemsWithQuantities.	! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 15:46:33'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 17:00:14'!
 listPurchasesOfUser: aClientID withPassword: aPassword
 
-	| historicPurchasedItemsBag totalAmount purchases |
-	
-	historicPurchasedItemsBag := Bag new.
-	totalAmount := 0.
-	purchases := Dictionary new.
-	historicPurchasedCarts valuesDo: [ :aCart | ( aCart listItemsWithQuantities ) keysAndValuesDo: [ :item :quantity | historicPurchasedItemsBag add: item withOccurrences: quantity  ].
-		totalAmount := totalAmount + aCart totalAmountOfItems.
-		 ].
-	
-	(historicPurchasedItemsBag asSet) do: [ :item | 
-		purchases add: ( Association key: item value: (historicPurchasedItemsBag occurrencesOf: item) ). ].
-	
-	purchases add: ( Association key: 'Total amount' value: totalAmount ).
-	
-	^ purchases.
+	^ session listPurchases.
 	
 	! !
 
@@ -1101,31 +1056,24 @@ nextCardID
 	lastCardID := lastCardID + 1.
 	^ lastCardID.! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:02:19'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:59:51'!
 thirtyMinutesLater
 
-	|oldTime|
-	
-	cartsLastUsedTime keys do: [:cartID | 
-		oldTime := cartsLastUsedTime at:cartID. 
-		cartsLastUsedTime at: cartID put: oldTime + 30]! !
+	session thirtyMinutesLater.! !
 
 !RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:21:09'!
 withAuthenticator: anAuthenticator
 
 	authenticator := anAuthenticator.! !
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:13:20'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:53:46'!
 withUser: anUser withPassword: aPassword withCatalog: aCatalog withAuthenticator: anAuthenticator
 
 	anAuthenticator authenticateUser: anUser withPassword: aPassword.
 	
-	cartList := Dictionary new.
-	historicPurchasedCarts := Dictionary new.
-	user := anUser.
+	session := Session withUser: anUser.
 	catalog := aCatalog.
-	lastCardID := 0.
-	cartsLastUsedTime := Dictionary new.! !
+	lastCardID := 0.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1174,6 +1122,91 @@ Object subclass: #Session
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!Session methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:55:56'!
+checkoutCartID: aCartID
+
+	historicPurchasedCarts add:
+		(Association
+			key: aCartID
+			value: (cartList at: aCartID)).
+	cartList removeKey: aCartID.! !
+
+!Session methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:57:02'!
+createCart: cartID withCart: aCart
+
+	cartList add: ( Association key: cartID value: ( aCart ) ).
+	cartsLastUsedTime add: ( Association key: cartID value: 0 ).! !
+
+!Session methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:57:47'!
+getCart: aCartID 
+	
+	| cart |
+	
+	(cartList includesKey: aCartID)
+		ifFalse: [
+			( historicPurchasedCarts includesKey: aCartID )
+				ifTrue: [ self error: RestInterface ErrorCarritoCheckouteado ]
+				ifFalse: [ self error: RestInterface ErrorCarritoInvalido ].
+				].
+			
+	cart := ( cartList at: aCartID ).
+	( ( cartsLastUsedTime at: aCartID ) < 30 )	
+		ifTrue: [ ^ cart ]
+		ifFalse: [ 
+			cartList removeKey: aCartID.
+			self error: RestInterface ErrorCarritoInvalido.
+			 ].
+		
+	^ cart.! !
+
+!Session methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:59:06'!
+listPurchases
+
+	| historicPurchasedItemsBag totalAmount purchases |
+	
+	historicPurchasedItemsBag := Bag new.
+	totalAmount := 0.
+	purchases := Dictionary new.
+	historicPurchasedCarts valuesDo: [ :aCart | ( aCart listItemsWithQuantities ) keysAndValuesDo: [ :item :quantity | historicPurchasedItemsBag add: item withOccurrences: quantity  ].
+		totalAmount := totalAmount + aCart totalAmountOfItems.
+		 ].
+	
+	(historicPurchasedItemsBag asSet) do: [ :item | 
+		purchases add: ( Association key: item value: (historicPurchasedItemsBag occurrencesOf: item) ). ].
+	
+	purchases add: ( Association key: 'Total amount' value: totalAmount ).
+	
+	^ purchases.
+	! !
+
+!Session methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:59:44'!
+thirtyMinutesLater
+
+	|oldTime|
+	
+	cartsLastUsedTime keys do: [:cartID | 
+		oldTime := cartsLastUsedTime at:cartID. 
+		cartsLastUsedTime at: cartID put: oldTime + 30]! !
+
+!Session methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:54:14'!
+withUser: aClientID
+
+	user := aClientID.
+	cartList := Dictionary new.
+	historicPurchasedCarts := Dictionary new.
+	cartsLastUsedTime := Dictionary new.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Session class' category: #TusLibros!
+Session class
+	instanceVariableNames: ''!
+
+!Session class methodsFor: 'as yet unclassified' stamp: 'ad 11/5/2017 16:54:03'!
+withUser: aClientID
+
+	^ self new withUser: aClientID.! !
 
 
 !classDefinition: #TestInstanceFactory category: #TusLibros!
