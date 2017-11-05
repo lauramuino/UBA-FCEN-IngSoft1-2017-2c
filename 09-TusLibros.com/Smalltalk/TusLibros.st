@@ -164,7 +164,7 @@ test04siSeAgregaUnLibroAlCarritoDebePertenecerAlCarrito
 
 	self assert: (unCarrito contains: anIsbnNumber).! !
 
-!CartTest methodsFor: 'testing' stamp: 'ad 11/1/2017 13:46:24'!
+!CartTest methodsFor: 'testing' stamp: 'lm 11/5/2017 02:05:26'!
 test05noSePuedenAgregarCantidadesNoEnterasDeLibrosAUnCarrito
 	| aCatalog unCarrito anIsbnNumber |
 	anIsbnNumber _ 1234.
@@ -175,10 +175,7 @@ test05noSePuedenAgregarCantidadesNoEnterasDeLibrosAUnCarrito
 			value: 20).
 	unCarrito _ testInstanceFactory emptyCartWithCatalog: aCatalog.
 	self
-		should: [
-			unCarrito
-				add: anIsbnNumber
-				withQuantity: 1.5 ]
+		should: [unCarrito 	add: anIsbnNumber withQuantity: 1.5 ]
 		raise: Error
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Cart ErrorCantidadDeItemsDebeSerEntera.
@@ -243,7 +240,7 @@ test02noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaVencida
 			self assert: anError messageText = Cashier ErrorTarjetaVencida.
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/2/2017 19:32:52'!
+!CashierTest methodsFor: 'testing' stamp: 'lm 11/4/2017 17:16:47'!
 test03noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaRobada
 	| aCart aCashier salesBook |
 	aCart _ testInstanceFactory cartWithAProduct.
@@ -256,37 +253,28 @@ test03noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaRobada
 		withMerchantProcessor: self.
 		
 	debitSimulator := [ :anAmount :aCard | self error: Cashier ErrorTarjetaRobada ].	
-	self
-		should: [ aCashier checkout ]
+	self should: [ aCashier checkout ]
 		raise: Error
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = Cashier ErrorTarjetaRobada .
 			self assert: salesBook isEmpty ].! !
 
-!CashierTest methodsFor: 'testing' stamp: 'ad 11/2/2017 19:35:10'!
+!CashierTest methodsFor: 'testing' stamp: 'lm 11/4/2017 17:51:57'!
 test04checkoutConCarritoNoVacioYTarjetaValidaGeneraUnaEntradaEnElLibroDeVentasAsociadoAlCarritoCorrespondiente
 	| aCatalog unCarrito aCashier salesBook anIsbnNumber totalAmount |
 	aCatalog _ Dictionary new.
 	anIsbnNumber _ 1235.
-	aCatalog add:
-		(Association
-			key: anIsbnNumber
-			value: 20).
+	aCatalog add: 	(Association key: anIsbnNumber value: 20).
 	unCarrito _ Cart withCatalog: aCatalog.
-	unCarrito
-		add: anIsbnNumber
-		withQuantity: 2.
+	unCarrito add: anIsbnNumber withQuantity: 2.
 	salesBook _ OrderedCollection new.
-	aCashier _ Cashier
-		withCart: unCarrito
-		withCheckoutDate: Date today
-		withCard: testInstanceFactory validCard
-		withSalesBook: salesBook
+	aCashier _ Cashier withCart: unCarrito withCheckoutDate: Date today
+		withCard: testInstanceFactory validCard withSalesBook: salesBook
 		withMerchantProcessor: self.
 	debitSimulator := [ :anAmount :aCard |  ].	
 	totalAmount _ aCashier checkout.
 	self assert: totalAmount = 40.
-	salesBook find: unCarrito.! !
+	self deny: (salesBook find: unCarrito) < 0.! !
 
 !CashierTest methodsFor: 'testing' stamp: 'ad 11/2/2017 19:38:26'!
 test05noSePuedeHacerCheckoutDeUnCarritoConUnaTarjetaSinFondos
@@ -342,10 +330,16 @@ debitAmount: anAmount withCard: aCard
 
 !classDefinition: #RESTest category: #TusLibros!
 TestCase subclass: #RESTest
-	instanceVariableNames: 'testInstanceFactory usersDataBase'
+	instanceVariableNames: 'testInstanceFactory usersDataBase cartSimulator'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!RESTest methodsFor: 'as yet unclassified' stamp: 'lm 11/4/2017 21:34:21'!
+addToCart: anIsbn withQuantity: aQuantity
+
+	^cartSimulator value: anIsbn value: aQuantity.
+! !
 
 !RESTest methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:36:23'!
 authenticateUser: userID withPassword: password.
@@ -386,6 +380,48 @@ test02crearUnCarritoConUsuarioYContraseñaValidosGeneraUnCarritoVacio
 	cartID := restInterface createCartWithUser: ( testInstanceFactory validUserID ) withPassword: ( testInstanceFactory validPassword ).
 	
 	self assert: ( restInterface listCart: cartID ) isEmpty.! !
+
+!RESTest methodsFor: 'as yet unclassified' stamp: 'lm 11/5/2017 02:27:45'!
+test03noSePuedenAgregarProductosConCantidadesNoEnterasONoPositivasAUnCarritoValido
+	| restInterface cartID |
+	
+	restInterface := RestInterface withAuthenticator: self.
+	cartID := restInterface createCartWithUser: ( testInstanceFactory validUserID ) withPassword: ( testInstanceFactory validPassword ).
+	
+	self should: [restInterface addToCart: cartID product: 1234 withQuantity: -1 withCatalog: Bag new.]
+	raise: Error - MessageNotUnderstood 
+	withExceptionDo: [ :anError | 	self assert: anError messageText =  RestInterface ErrorInvalidProductQuantity.].
+
+	self should: [restInterface addToCart: cartID product: 1234 withQuantity: 1.4 withCatalog: Bag new.] 
+	raise: Error - MessageNotUnderstood 
+	withExceptionDo:[:anError | 	self assert: anError messageText =  RestInterface ErrorInvalidProductQuantity.].! !
+
+!RESTest methodsFor: 'as yet unclassified' stamp: 'lm 11/5/2017 02:26:25'!
+test04noSePuedenAgregarProductosQueNoPertenezcanALaEditorial
+	| restInterface cartID|
+	
+	restInterface := RestInterface withAuthenticator: self.
+	cartID := restInterface createCartWithUser: ( testInstanceFactory validUserID ) withPassword: ( testInstanceFactory validPassword ).
+
+	self should: [restInterface addToCart: cartID product: 1234 withQuantity: 1 withCatalog: Bag new.]
+	raise: Error - MessageNotUnderstood 
+	withExceptionDo: [ :anError | 	self assert: anError messageText =  RestInterface ErrorInvalidProductIsbn.].
+! !
+
+!RESTest methodsFor: 'as yet unclassified' stamp: 'lm 11/5/2017 02:28:33'!
+test05agregarProductosDeLaEditorialACarritoValidoHACENALGOQUESEYO
+	| restInterface cartID aCatalog|
+	
+	restInterface := RestInterface withAuthenticator: self.
+	cartID := restInterface createCartWithUser: ( testInstanceFactory validUserID ) withPassword: ( testInstanceFactory validPassword ).
+	
+	aCatalog := Bag new.
+	aCatalog add: 1234.
+	
+	restInterface addToCart: cartID product: 1234 withQuantity: 1 withCatalog: aCatalog .
+	
+	self deny: (restInterface listCart: cartID) isEmpty.
+! !
 
 
 !classDefinition: #Card category: #TusLibros!
@@ -586,10 +622,23 @@ Object subclass: #RestInterface
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:23:34'!
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'lm 11/5/2017 02:23:56'!
+addToCart: aCartID product: anIsbn withQuantity: aQuantity withCatalog: aCatalog
+	
+	(aQuantity isKindOf: Integer) ifFalse: [^ self error: RestInterface ErrorInvalidProductQuantity].
+	
+	(aQuantity > 0) ifFalse: [^ self error: RestInterface ErrorInvalidProductQuantity].
+	
+	(aCatalog includes: anIsbn) ifFalse: [^ self error: RestInterface ErrorInvalidProductIsbn ].
+	
+	
+	! !
+
+!RestInterface methodsFor: 'as yet unclassified' stamp: 'lm 11/4/2017 16:35:06'!
 createCartWithUser: userID withPassword: password 
 
-	authenticator authenticateUser: userID withPassword: password.! !
+	authenticator authenticateUser: userID withPassword: password.
+	^1.! !
 
 !RestInterface methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:42:11'!
 listCart: aRestInterface 
@@ -606,6 +655,16 @@ withAuthenticator: anAuthenticator
 !classDefinition: 'RestInterface class' category: #TusLibros!
 RestInterface class
 	instanceVariableNames: ''!
+
+!RestInterface class methodsFor: 'as yet unclassified' stamp: 'lm 11/4/2017 19:46:43'!
+ErrorInvalidProductIsbn
+
+	^'Los productos no pertenecen al catálogo'.! !
+
+!RestInterface class methodsFor: 'as yet unclassified' stamp: 'lm 11/4/2017 16:32:51'!
+ErrorInvalidProductQuantity
+
+	^'Las cantidades del producto deben ser enteras y positivas'.! !
 
 !RestInterface class methodsFor: 'as yet unclassified' stamp: 'ad 11/2/2017 20:33:16'!
 ErrorInvalidUser
